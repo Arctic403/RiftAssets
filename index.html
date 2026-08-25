@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#0a0c10">
-  <title>RiftMap — RiftCity 2D City Builder</title>
+  <meta name="theme-color" content="#090b0e">
+  <title>RiftMap — RiftCity 2.5D World Reviewer</title>
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
@@ -12,7 +12,7 @@
     <header class="topbar">
       <div class="brand">
         <span>RIFTCITY</span>
-        <strong>2D MAP BUILDER</strong>
+        <strong>2.5D WORLD REVIEWER</strong>
       </div>
 
       <div class="tool-strip" aria-label="Map tools">
@@ -24,7 +24,15 @@
         <button class="tool" data-tool="prop" title="Prop (P)">PROP <kbd>P</kbd></button>
         <button class="tool" data-tool="zone" title="Zone (Z)">ZONE <kbd>Z</kbd></button>
         <button class="tool" data-tool="interaction" title="Interaction (I)">INTERACT <kbd>I</kbd></button>
-        <button id="preview-toggle">▶ PREVIEW</button>
+        <button id="preview-toggle">▶ WALK</button>
+      </div>
+
+      <div class="view-actions">
+        <div class="segmented" aria-label="Map view">
+          <button id="view-plan">PLAN</button>
+          <button id="view-iso" class="active">2.5D</button>
+        </div>
+        <button id="lighting-toggle">NIGHT</button>
       </div>
 
       <div class="top-actions">
@@ -38,11 +46,20 @@
     <aside class="panel library-panel" id="library-panel">
       <div class="panel-head">
         <div>
-          <span class="kicker">CITY KIT</span>
-          <strong>Map Library</strong>
+          <span class="kicker">WORLD KIT</span>
+          <strong>Downtown Review</strong>
         </div>
         <button class="panel-close mobile-only" data-close-panel="library">×</button>
       </div>
+
+      <section class="panel-section authored-card">
+        <span class="kicker">AUTHORED DISTRICT</span>
+        <strong>Downtown Proof</strong>
+        <small>
+          This map is generated as RiftCity's first 2.5D district. Use the editor to review and tune it instead of hand-building everything.
+        </small>
+        <button id="restore-authored" class="primary full-button">RESTORE AUTHORED DOWNTOWN</button>
+      </section>
 
       <section class="panel-section map-settings">
         <div class="section-title"><span>MAP</span><small id="map-object-count">0 objects</small></div>
@@ -63,12 +80,12 @@
       </section>
 
       <section class="panel-section palette-section">
-        <div class="section-title"><span id="palette-title">BUILDINGS</span><small id="palette-help">Choose a placement style</small></div>
+        <div class="section-title"><span id="palette-title">SELECT</span><small id="palette-help">Tap an object to review</small></div>
         <div id="palette-list" class="palette-list"></div>
       </section>
 
       <section class="panel-section">
-        <div class="section-title"><span>MAP JSON</span><small>RiftCity-ready format</small></div>
+        <div class="section-title"><span>MAP JSON</span><small>shared runtime data</small></div>
         <div class="two-buttons">
           <button id="import-json">IMPORT</button>
           <button id="paste-json">PASTE</button>
@@ -86,16 +103,23 @@
         </div>
       </section>
 
-      <div class="panel-status" id="status">RiftMap ready.</div>
+      <div class="panel-status" id="status">RiftMap 2.5D ready.</div>
     </aside>
 
     <main class="viewport" id="viewport">
-      <canvas id="map-canvas" tabindex="0" aria-label="RiftCity 2D map editor"></canvas>
+      <canvas id="map-canvas" tabindex="0" aria-label="RiftCity 2.5D world editor"></canvas>
 
       <div class="viewport-badge">
-        <span id="mode-label">SELECT</span>
-        <strong id="map-title">RiftCity Draft</strong>
+        <span id="mode-label">SELECT · 2.5D</span>
+        <strong id="map-title">RiftCity — Downtown Proof District</strong>
         <small id="cursor-readout">X 0 · Y 0 · 100%</small>
+      </div>
+
+      <div class="review-strip">
+        <span><b id="stat-buildings">0</b> BUILDINGS</span>
+        <span><b id="stat-roads">0</b> ROADS</span>
+        <span><b id="stat-props">0</b> PROPS</span>
+        <span><b id="stat-interactions">0</b> INTERACTIONS</span>
       </div>
 
       <div class="minimap-wrap">
@@ -110,11 +134,11 @@
 
       <div class="preview-hud" id="preview-hud" hidden>
         <div>
-          <span class="kicker">PLAY TEST</span>
+          <span class="kicker">WALK TEST</span>
           <strong id="preview-position">X 0 · Y 0</strong>
           <small id="nearby-interaction">Walk near an interaction marker.</small>
         </div>
-        <button id="preview-exit">EXIT PREVIEW</button>
+        <button id="preview-exit">EXIT WALK</button>
       </div>
 
       <div class="mobile-dpad" id="mobile-dpad" hidden aria-label="Preview movement controls">
@@ -128,13 +152,13 @@
     <aside class="panel inspector-panel" id="inspector-panel">
       <div class="panel-head">
         <div>
-          <span class="kicker">OBJECT</span>
+          <span class="kicker">REVIEW OBJECT</span>
           <strong>Inspector</strong>
         </div>
         <button class="panel-close mobile-only" data-close-panel="inspector">×</button>
       </div>
 
-      <section class="panel-section">
+      <section class="panel-section selected-card">
         <span class="kicker">SELECTED</span>
         <strong id="selected-name">Nothing selected</strong>
         <small id="selected-meta">Choose SELECT, then tap an object.</small>
@@ -145,12 +169,21 @@
           <label>X<input data-field="x" type="number" step="1"></label>
           <label>Y<input data-field="y" type="number" step="1"></label>
           <label>WIDTH<input data-field="width" type="number" min="1" step="1"></label>
-          <label>HEIGHT<input data-field="height" type="number" min="1" step="1"></label>
+          <label>DEPTH<input data-field="height" type="number" min="1" step="1"></label>
           <label>ROTATE<input data-field="rotation" type="number" step="1"></label>
           <label>ROAD W<input data-field="roadWidth" type="number" min="4" step="2"></label>
         </div>
 
-        <label class="stack-label">LABEL<input id="object-label" type="text" maxlength="60"></label>
+        <label class="stack-label">LABEL<input id="object-label" type="text" maxlength="80"></label>
+
+        <div class="building-fields" id="building-fields">
+          <div class="field-grid">
+            <label>FLOORS<input id="object-floors" type="number" min="1" max="30" step="1"></label>
+            <label>STYLE<select id="object-style"></select></label>
+          </div>
+          <label class="stack-label">ASSET ID<input id="object-asset" type="text" maxlength="100"></label>
+          <small class="field-note">Asset IDs are saved now so final sprite art can replace the procedural fallback without rebuilding the map.</small>
+        </div>
 
         <div class="field-grid compact">
           <label>COLOR<input id="object-color" type="color"></label>
@@ -175,17 +208,26 @@
       <section class="panel-section button-grid">
         <button id="duplicate-object">DUPLICATE</button>
         <button id="center-object">CENTER VIEW</button>
+        <button id="set-spawn">SET PLAYER SPAWN</button>
         <button id="raise-object">MOVE UP</button>
         <button id="lower-object">MOVE DOWN</button>
         <button id="delete-object" class="danger">DELETE</button>
       </section>
 
       <section class="panel-section help-card">
+        <span class="kicker">REVIEW WORKFLOW</span>
+        <small>
+          Use <b>2.5D</b> to judge the district visually and <b>PLAN</b> for precise layout edits.
+          In either view: drag selected objects, adjust the inspector, or swap building style/floors.
+          WALK tests collision and interaction placement.
+        </small>
+      </section>
+
+      <section class="panel-section help-card">
         <span class="kicker">CONTROLS</span>
         <small>
-          Mouse: wheel zoom · middle/right drag pan · SELECT drag moves objects.<br>
-          Keyboard: V/H/R/B/P/Z/I tools · arrows nudge · Shift = 4× · Delete removes · Cmd/Ctrl+Z undo.<br>
-          Mobile: PAN tool drags map · pinch zoom · SELECT drags objects.
+          Wheel / pinch = zoom · PAN = drag camera · SELECT = move objects · V/H/R/B/P/Z/I = tools ·
+          arrows = nudge · Shift = 4× · Delete = remove · Cmd/Ctrl+Z = undo.
         </small>
       </section>
     </aside>

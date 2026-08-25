@@ -1,39 +1,94 @@
-# RiftAssets → RiftMap
+# RiftAssets → RiftMap 2.5D
 
-RiftAssets has been converted into the **RiftCity 2D Map Builder**: a lightweight, GitHub Pages-ready city builder/viewer/editor for designing the walkable 2D/2.5D version of RiftCity.
+RiftAssets is now the **RiftCity 2.5D World Reviewer / Map Editor**.
 
-## What it does
+The workflow is intentionally different from a blank level editor:
 
-- Large pannable and zoomable 2D city canvas.
-- Mouse, keyboard, iPhone touch, and pinch-zoom support.
-- Select / pan / road / building / prop / zone / interaction tools.
-- Drag roads from start to end.
-- Drag building and zone footprints directly on the map.
-- Place street props and gameplay interaction markers.
-- Layer visibility for roads, lots, buildings, props, zones, and interactions.
-- Inspector for position, dimensions, rotation, color, collision, label, and layer.
-- Move, duplicate, delete, reorder, and nudge selected objects.
-- Grid snapping and adjustable map/grid sizes.
-- Local browser draft saving.
-- Undo/redo history.
-- Minimap and fit-to-map controls.
-- Map JSON import, paste import, validation, and export.
-- Play-test preview mode with a movable player, basic building/prop collision, and nearby interaction detection.
-- Mobile on-screen movement pad for previewing the city.
+1. RiftCity districts are authored as complete starting layouts.
+2. RiftMap loads the authored district in both plan and 2.5D views.
+3. The editor is used to review, move, resize, restyle, and fix the authored layout.
+4. The same exported map JSON is designed to be consumed later by the RiftCity game runtime.
+
+## Phase 4 — authored Downtown proof
+
+The default map is now **RiftCity — Downtown Proof District**.
+
+It includes:
+
+- 8 roads and alleys.
+- 18 authored buildings.
+- 34 street props.
+- 10 lot / district / gameplay zones.
+- 9 gameplay interaction markers.
+- Apartments, shops, offices, a bank, gym, hospital, warehouse, casino, and nightclub.
+- Player spawn and walk-test collision.
+- Day / night review.
+- Procedural 2.5D building façades with floors, windows, storefront glazing, signs, roof equipment, and depth sorting.
+
+The procedural building art is a **fallback visual system**, not the final sprite pack. Every building now carries an `assetId` plus a style and floor count so final transparent sprite artwork can replace the fallback later without rebuilding district layout data.
+
+## Views
+
+### 2.5D
+
+The default review view uses an isometric projection with:
+
+- extruded building massing,
+- visible façades,
+- floor/window detail,
+- roof equipment,
+- street props,
+- road/sidewalk surfaces,
+- depth sorting,
+- interaction markers,
+- player walk test,
+- day/night lighting preview.
+
+Use this view to judge whether the district feels like the game.
+
+### Plan
+
+Plan view keeps precise top-down footprints for layout work:
+
+- roads,
+- lots,
+- collision footprints,
+- buildings,
+- zones,
+- props,
+- interaction positions.
+
+Use PLAN when exact placement matters.
+
+## Editor tools
+
+- Select / Pan / Road / Building / Prop / Zone / Interaction.
+- Mouse, keyboard, iPhone touch, and pinch zoom.
+- Grid snapping.
+- Move, duplicate, delete, reorder, and nudge.
+- Building floor count, style, and future `assetId`.
+- Collision flags.
+- Player spawn placement.
+- Layer visibility.
+- Undo / redo.
+- Local browser drafts.
+- Minimap.
+- JSON import / paste import / export.
+- WALK mode with collision and nearby-interaction detection.
 
 ## Map format
 
-Exports use:
+The map remains:
 
 ```json
 {
   "format": "riftcity-2d-map",
-  "version": 1,
-  "name": "RiftCity Draft",
-  "width": 2048,
-  "height": 2048,
+  "version": 2,
+  "name": "RiftCity — Downtown Proof District",
+  "width": 3072,
+  "height": 3072,
   "gridSize": 32,
-  "playerSpawn": {"x": 1024, "y": 1024},
+  "playerSpawn": {"x": 1490, "y": 1160},
   "roads": [],
   "buildings": [],
   "props": [],
@@ -42,22 +97,25 @@ Exports use:
 }
 ```
 
-This is intentionally designed so RiftCity can later consume the same map data for its live 2D city client.
+A building can now include:
 
-## GitHub Pages
+```json
+{
+  "kind": "apartment",
+  "floors": 5,
+  "style": "brick-warm",
+  "assetId": "building.apartment.brick-warm"
+}
+```
 
-1. Open **Settings → Pages**.
-2. Choose **Deploy from a branch**.
-3. Select `main` and `/ (root)`.
-4. Save.
-
-There is no build step and no external rendering engine.
+`assetId` is the bridge to the final shared sprite library.
 
 ## Files
 
-- `index.html` — editor UI.
-- `styles.css` — desktop/mobile layout.
-- `app.js` — map editing, rendering, import/export, and preview logic.
-- `map/default-map.js` — starter map, layers, and placement palettes.
+- `index.html` — reviewer/editor UI.
+- `styles.css` — desktop/mobile interface.
+- `app.js` — 2D/2.5D rendering, editing, depth sorting, preview, import/export.
+- `map/default-map.js` — authored Downtown proof district and editor palettes.
+- `map/world-kit.js` — shared building/material/prop/interaction style catalog.
 
-The old Babylon/glTF asset-lab files were removed from the active project during the 2D conversion.
+The project stays static and GitHub Pages-ready with no build step and no external rendering engine.
