@@ -1,7 +1,9 @@
 import { MAP_LAYERS, PALETTES, createStarterMap } from './map/default-map.js';
 import { BUILDING_STYLES, PROP_STYLES, INTERACTION_STYLES, styleForBuilding, shadeHex } from './map/world-kit.js';
 
-const STORAGE_KEY='riftcity-25d-map-draft-v2';
+const STORAGE_KEY='riftcity-2d-map-draft-ground-v2';
+const groundImage=new Image();
+groundImage.src='./assets/downtown-ground.svg';
 const $=selector=>document.querySelector(selector);
 const canvas=$('#map-canvas');
 const minimap=$('#minimap');
@@ -54,6 +56,9 @@ function init(){
   renderPalette();
   syncMapInputs();
   updateModeLabel();
+  $('#preview-hud').hidden=true;
+  $('#mobile-dpad').hidden=true;
+  document.body.classList.remove('walk-active');
   refreshInspector();
   refreshStats();
   resizeCanvas();
@@ -538,10 +543,10 @@ function draw(now){
 
 function drawPlan(now){
   drawPlanBackground();
+  drawGroundImage();
   if(state.grid)drawPlanGrid();
-  drawPlanZones('lots');
+  // Downtown ground art owns lots, roads, sidewalks, alleys and markings.
   drawPlanZones('zones');
-  if(!state.hiddenLayers.has('roads'))for(const road of state.map.roads)drawPlanRoad(road);
   if(!state.hiddenLayers.has('buildings'))for(const building of state.map.buildings)drawPlanBuilding(building);
   if(!state.hiddenLayers.has('props'))for(const prop of state.map.props)drawPlanProp(prop);
   drawSpawnMarker(false);
@@ -549,6 +554,13 @@ function drawPlan(now){
   if(state.drawPreview)drawDraftPreview(state.drawPreview);
   if(state.selected&&!state.preview)drawSelection(state.selected);
   if(state.preview)drawPlayer(false);
+}
+
+
+function drawGroundImage(){
+  if(!groundImage.complete||!groundImage.naturalWidth)return;
+  const a=worldToScreen(0,0),b=worldToScreen(state.map.width,state.map.height);
+  ctx.drawImage(groundImage,a.x,a.y,b.x-a.x,b.y-a.y);
 }
 
 function drawPlanBackground(){
@@ -1066,6 +1078,7 @@ function togglePreview(){
   $('#preview-toggle').textContent=state.preview?'■ EDIT':'▶ WALK';
   $('#preview-hud').hidden=!state.preview;
   $('#mobile-dpad').hidden=!state.preview;
+  document.body.classList.toggle('walk-active',state.preview);
 
   if(state.preview){
     state.player.x=state.map.playerSpawn?.x??state.map.width/2;

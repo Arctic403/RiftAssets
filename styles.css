@@ -132,3 +132,8 @@ input[type=color]{padding:2px}
   .segmented button{min-width:48px}
   .tool-strip{min-width:0}
 }
+
+/* WALK UI is opt-in only. This overrides mobile/layout rules that could expose it while editing. */
+#preview-hud, #mobile-dpad { display:none !important; }
+body.walk-active #preview-hud:not([hidden]) { display:block !important; }
+body.walk-active #mobile-dpad:not([hidden]) { display:grid !important; }

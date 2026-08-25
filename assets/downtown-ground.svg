@@ -1,0 +1,113 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3584" height="3328" viewBox="0 0 3584 3328">
+<defs>
+  <pattern id="grass" width="64" height="64" patternUnits="userSpaceOnUse">
+    <rect width="64" height="64" fill="#52664d"/>
+    <path d="M8 15l5-2M39 11l6 1M19 48l5-3M50 42l4 2M4 59l4-1" stroke="#62765a" stroke-width="2" opacity=".28"/>
+  </pattern>
+  <pattern id="asphalt" width="96" height="96" patternUnits="userSpaceOnUse">
+    <rect width="96" height="96" fill="#3d4245"/>
+    <circle cx="18" cy="25" r="1.2" fill="#596064" opacity=".45"/>
+    <circle cx="69" cy="52" r="1" fill="#272c2f" opacity=".45"/>
+    <path d="M5 76l19-3M61 13l12 2" stroke="#555b5e" stroke-width="1" opacity=".18"/>
+  </pattern>
+  <pattern id="walk" width="48" height="48" patternUnits="userSpaceOnUse">
+    <rect width="48" height="48" fill="#929087"/>
+    <path d="M0 24h48M24 0v48" stroke="#85837b" stroke-width="1" opacity=".35"/>
+  </pattern>
+</defs>
+
+<!-- base terrain -->
+<rect width="3584" height="3328" fill="url(#grass)"/>
+
+<!-- large urban hardscape / developable blocks -->
+<g fill="#777970" stroke="#696b65" stroke-width="5">
+ <rect x="150" y="170" width="480" height="330" rx="18"/>
+ <path d="M880 170H1640V500H880z"/>
+ <path d="M1940 170H2730V500H1940z"/>
+ <rect x="3040" y="220" width="360" height="280" rx="18"/>
+ <rect x="160" y="760" width="440" height="560" rx="18"/>
+ <path d="M870 760h260v570H870z"/>
+ <path d="M1220 720h430v630h-430z"/>
+ <path d="M1940 740h660v600h-660z"/>
+ <rect x="3070" y="760" width="330" height="570" rx="18"/>
+ <rect x="160" y="1620" width="440" height="500" rx="18"/>
+ <path d="M850 1970h800v170H850z"/>
+ <path d="M1940 1970h790v170h-790z"/>
+ <rect x="3070" y="1640" width="330" height="450" rx="18"/>
+ <rect x="160" y="2420" width="440" height="360" rx="18"/>
+ <rect x="850" y="2420" width="280" height="360" rx="18"/>
+ <rect x="1300" y="2420" width="360" height="360" rx="18"/>
+ <rect x="1940" y="2420" width="390" height="360" rx="18"/>
+ <rect x="2600" y="2460" width="140" height="320" rx="18"/>
+ <rect x="3070" y="2420" width="330" height="360" rx="18"/>
+</g>
+
+<!-- sidewalks/curb corridors -->
+<g fill="none" stroke="url(#walk)" stroke-linecap="round">
+ <path d="M736 160V3168" stroke-width="204"/>
+ <path d="M1792 96V3232" stroke-width="220"/>
+ <path d="M2880 224V3104" stroke-width="184"/>
+ <path d="M160 608H3424" stroke-width="176"/>
+ <path d="M96 1472H3488" stroke-width="208"/>
+ <path d="M224 2272H3360" stroke-width="168"/>
+ <path d="M352 2944H3232" stroke-width="160"/>
+ <path d="M736 608L1184 1040" stroke-width="138"/>
+ <path d="M2368 2272L2880 2688" stroke-width="138"/>
+</g>
+
+<!-- main road asphalt -->
+<g fill="none" stroke="url(#asphalt)" stroke-linecap="round">
+ <path d="M736 160V3168" stroke-width="144"/>
+ <path d="M1792 96V3232" stroke-width="160"/>
+ <path d="M2880 224V3104" stroke-width="128"/>
+ <path d="M160 608H3424" stroke-width="120"/>
+ <path d="M96 1472H3488" stroke-width="144"/>
+ <path d="M224 2272H3360" stroke-width="112"/>
+ <path d="M352 2944H3232" stroke-width="104"/>
+ <path d="M736 608L1184 1040" stroke-width="88"/>
+ <path d="M2368 2272L2880 2688" stroke-width="88"/>
+</g>
+
+<!-- alleys -->
+<g fill="none" stroke="#34393b" stroke-width="48" stroke-linecap="butt">
+ <path d="M1056 608V1472"/><path d="M1408 1056H1792"/>
+ <path d="M2336 608V1472"/><path d="M736 1856H1792"/>
+ <path d="M1792 1856H2880"/><path d="M1184 2272V2944"/>
+ <path d="M2464 2272V2944"/>
+</g>
+<g fill="none" stroke="#77766d" stroke-width="2" stroke-dasharray="10 14" opacity=".55">
+ <path d="M1056 608V1472"/><path d="M1408 1056H1792"/><path d="M2336 608V1472"/>
+ <path d="M736 1856H2880"/><path d="M1184 2272V2944"/><path d="M2464 2272V2944"/>
+</g>
+
+<!-- avenue center lines and local street markings -->
+<g fill="none" stroke="#d5aa55" stroke-width="5" stroke-dasharray="42 30" opacity=".9">
+ <path d="M736 160V3168"/><path d="M1792 96V3232"/><path d="M2880 224V3104"/><path d="M96 1472H3488"/>
+</g>
+<g fill="none" stroke="#d6d1b5" stroke-width="4" stroke-dasharray="34 28" opacity=".7">
+ <path d="M160 608H3424"/><path d="M224 2272H3360"/><path d="M352 2944H3232"/>
+ <path d="M736 608L1184 1040"/><path d="M2368 2272L2880 2688"/>
+</g>
+
+<!-- central open hub / market square -->
+<rect x="1210" y="1585" width="455" height="250" rx="28" fill="#aaa28e" stroke="#cbc2aa" stroke-width="7"/>
+<path d="M1245 1620h385M1245 1680h385M1245 1740h385M1245 1800h385" stroke="#948d7d" stroke-width="3" opacity=".55"/>
+<path d="M1310 1595v230M1438 1595v230M1566 1595v230" stroke="#948d7d" stroke-width="3" opacity=".42"/>
+
+<!-- civic green / open park -->
+<path d="M3035 1635h335v465h-335z" fill="#5e7957" stroke="#78906f" stroke-width="7"/>
+<path d="M3065 1865h275M3202 1665v405" stroke="#a49f8d" stroke-width="34" opacity=".85"/>
+
+<!-- parking/service pads, still ground-only -->
+<g fill="#555b5d" stroke="#777c7c" stroke-width="5">
+ <rect x="1300" y="2440" width="345" height="320" rx="12"/>
+ <rect x="2595" y="2470" width="150" height="300" rx="12"/>
+</g>
+<g stroke="#b8b39d" stroke-width="4" opacity=".65">
+ <path d="M1335 2490h275M1335 2550h275M1335 2610h275M1335 2670h275"/>
+ <path d="M2625 2510h90M2625 2570h90M2625 2630h90M2625 2690h90"/>
+</g>
+
+<!-- subtle map edge -->
+<rect x="8" y="8" width="3568" height="3312" fill="none" stroke="#29342c" stroke-width="16"/>
+</svg>

@@ -18,6 +18,8 @@ The existing Downtown proof is preserved, including roads, buildings, props, lot
 
 ## 2D presentation
 
+Downtown now uses `assets/downtown-ground.svg` as its authored ground-art plate. Roads, sidewalks, alleys, grass, plazas, parking/service surfaces, curbs, and road markings are baked into that scalable base artwork. Interactive/editor objects remain separate layers on top.
+
 The renderer now focuses on readable top-down visuals:
 
 - roads, sidewalks, and lane markings,

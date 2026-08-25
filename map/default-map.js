@@ -48,8 +48,8 @@ export function createStarterMap(){
   return {
     format:'riftcity-2d-map',
     version:2,
-    name:'RiftCity — Downtown Ground Plan',
-    revision:'downtown-ground-v1',
+    name:'RiftCity — Downtown Ground Art V1',
+    revision:'downtown-ground-art-v1',
     width:3584,
     height:3328,
     gridSize:32,
