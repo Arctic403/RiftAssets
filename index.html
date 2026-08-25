@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0b0d10">
+  <title>RiftAssets — Asset Lab</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div id="app" class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <span>RIFTASSETS</span>
+        <strong>ASSET LAB</strong>
+      </div>
+
+      <div class="top-actions">
+        <button id="library-toggle" class="mobile-only">LIBRARY</button>
+        <button id="inspector-toggle" class="mobile-only">INSPECTOR</button>
+        <button data-mode="move" class="mode active" title="Move (W)">MOVE <kbd>W</kbd></button>
+        <button data-mode="rotate" class="mode" title="Rotate (E)">ROTATE <kbd>E</kbd></button>
+        <button data-mode="scale" class="mode" title="Scale (R)">SCALE <kbd>R</kbd></button>
+        <button id="grid-toggle" class="active">GRID</button>
+        <button id="wire-toggle">WIREFRAME</button>
+        <button id="bounds-toggle">BOUNDS</button>
+        <button id="light-toggle">NIGHT</button>
+        <button id="screenshot-button">PNG</button>
+      </div>
+    </header>
+
+    <aside id="library-panel" class="panel library-panel">
+      <div class="panel-head">
+        <div><span class="kicker">PACK 01</span><strong>Asset Library</strong></div>
+        <button class="panel-close mobile-only" data-close-panel="library">×</button>
+      </div>
+
+      <label class="search-wrap">
+        <span>SEARCH</span>
+        <input id="asset-search" type="search" placeholder="building, car, prop…" autocomplete="off">
+      </label>
+
+      <div id="asset-list" class="asset-list"></div>
+
+      <div class="panel-footer">
+        <button id="reset-asset">RESET ASSET</button>
+        <button id="clear-drafts" class="danger-ghost">CLEAR ALL DRAFTS</button>
+      </div>
+    </aside>
+
+    <main class="viewport">
+      <canvas id="preview-canvas" tabindex="0" aria-label="3D asset preview"></canvas>
+
+      <div class="viewport-title">
+        <span id="asset-category">BUILDING</span>
+        <strong id="asset-name">Corner Store</strong>
+        <small id="asset-description">Loading…</small>
+      </div>
+
+      <div class="scene-stats">
+        <div><span>MESHES</span><b id="stat-meshes">0</b></div>
+        <div><span>VERTS</span><b id="stat-verts">0</b></div>
+        <div><span>TRIS</span><b id="stat-tris">0</b></div>
+      </div>
+
+      <div class="viewport-help">
+        <span>Drag = orbit</span><span>Wheel/pinch = zoom</span><span>Click part = select</span>
+      </div>
+    </main>
+
+    <aside id="inspector-panel" class="panel inspector-panel">
+      <div class="panel-head">
+        <div><span class="kicker">EDIT</span><strong>Inspector</strong></div>
+        <button class="panel-close mobile-only" data-close-panel="inspector">×</button>
+      </div>
+
+      <section class="inspector-section">
+        <span class="kicker">SELECTED PART</span>
+        <strong id="selected-part-name">Nothing selected</strong>
+        <small id="selected-part-type">Click a part of the asset.</small>
+      </section>
+
+      <section class="inspector-section">
+        <div class="section-title">
+          <span>PARTS</span>
+          <div>
+            <button id="add-box" class="mini">+ BOX</button>
+            <button id="add-cylinder" class="mini">+ CYL</button>
+            <button id="add-sphere" class="mini">+ SPHERE</button>
+          </div>
+        </div>
+        <div id="parts-list" class="parts-list"></div>
+      </section>
+
+      <section class="inspector-section">
+        <span class="kicker">TRANSFORM</span>
+        <div class="field-grid">
+          <label>X<input data-field="x" type="number" step="0.1"></label>
+          <label>Y<input data-field="y" type="number" step="0.1"></label>
+          <label>Z<input data-field="z" type="number" step="0.1"></label>
+
+          <label>RX<input data-field="rx" type="number" step="1"></label>
+          <label>RY<input data-field="ry" type="number" step="1"></label>
+          <label>RZ<input data-field="rz" type="number" step="1"></label>
+
+          <label>SX<input data-field="sx" type="number" min="0.05" step="0.05"></label>
+          <label>SY<input data-field="sy" type="number" min="0.05" step="0.05"></label>
+          <label>SZ<input data-field="sz" type="number" min="0.05" step="0.05"></label>
+        </div>
+      </section>
+
+      <section class="inspector-section">
+        <span class="kicker">MATERIAL</span>
+        <div class="material-row">
+          <label>COLOR<input id="part-color" type="color" value="#777777"></label>
+          <label>ROUGH<input id="part-roughness" type="range" min="0" max="1" step="0.05" value="0.8"></label>
+          <label>METAL<input id="part-metallic" type="range" min="0" max="1" step="0.05" value="0"></label>
+        </div>
+      </section>
+
+      <section class="inspector-section button-grid">
+        <button id="duplicate-part">DUPLICATE</button>
+        <button id="hide-part">HIDE</button>
+        <button id="delete-part" class="danger">DELETE</button>
+        <button id="focus-part">FOCUS</button>
+      </section>
+
+      <section class="inspector-section history-row">
+        <button id="undo-button">UNDO <kbd>⌘Z</kbd></button>
+        <button id="redo-button">REDO</button>
+      </section>
+
+      <section class="inspector-section export-section">
+        <button id="export-json" class="primary">EXPORT ASSET JSON</button>
+        <button id="copy-json">COPY JSON</button>
+        <textarea id="export-output" hidden spellcheck="false" aria-label="Exported asset JSON"></textarea>
+        <small id="lab-status">Asset Lab ready.</small>
+      </section>
+    </aside>
+  </div>
+
+  <script src="https://cdn.babylonjs.com/babylon.js"></script>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
