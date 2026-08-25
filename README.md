@@ -1,62 +1,63 @@
-# RiftAssets
+# RiftAssets → RiftMap
 
-RiftAssets is the standalone visual asset lab for RiftCity.
+RiftAssets has been converted into the **RiftCity 2D Map Builder**: a lightweight, GitHub Pages-ready city builder/viewer/editor for designing the walkable 2D/2.5D version of RiftCity.
 
 ## What it does
 
-- Runs directly on GitHub Pages.
-- Uses Babylon.js for a clean isolated 3D preview scene.
-- Includes the first 15 stylized low-poly RiftCity assets.
-- Click/tap individual parts to edit them.
-- Move, rotate and scale with Babylon gizmos.
-- Mouse/keyboard shortcuts: `W` move, `E` rotate, `R` scale, arrows nudge, Delete removes, Cmd/Ctrl+Z undo.
-- Mobile-friendly library and inspector panels.
-- Per-part position, rotation, size, color, roughness and metallic controls.
-- Wireframe and bounding-box debugging.
-- Local browser drafts.
-- Export a single edited asset definition as JSON.
-- Import `.asset.json` files from iPhone Files/desktop or paste JSON directly into the lab.
-- Imported assets are validated and stored locally; matching IDs override the built-in preview until removed.
-- Save a PNG preview.
+- Large pannable and zoomable 2D city canvas.
+- Mouse, keyboard, iPhone touch, and pinch-zoom support.
+- Select / pan / road / building / prop / zone / interaction tools.
+- Drag roads from start to end.
+- Drag building and zone footprints directly on the map.
+- Place street props and gameplay interaction markers.
+- Layer visibility for roads, lots, buildings, props, zones, and interactions.
+- Inspector for position, dimensions, rotation, color, collision, label, and layer.
+- Move, duplicate, delete, reorder, and nudge selected objects.
+- Grid snapping and adjustable map/grid sizes.
+- Local browser draft saving.
+- Undo/redo history.
+- Minimap and fit-to-map controls.
+- Map JSON import, paste import, validation, and export.
+- Play-test preview mode with a movable player, basic building/prop collision, and nearby interaction detection.
+- Mobile on-screen movement pad for previewing the city.
+
+## Map format
+
+Exports use:
+
+```json
+{
+  "format": "riftcity-2d-map",
+  "version": 1,
+  "name": "RiftCity Draft",
+  "width": 2048,
+  "height": 2048,
+  "gridSize": 32,
+  "playerSpawn": {"x": 1024, "y": 1024},
+  "roads": [],
+  "buildings": [],
+  "props": [],
+  "zones": [],
+  "interactions": []
+}
+```
+
+This is intentionally designed so RiftCity can later consume the same map data for its live 2D city client.
 
 ## GitHub Pages
-
-In the repository:
 
 1. Open **Settings → Pages**.
 2. Choose **Deploy from a branch**.
 3. Select `main` and `/ (root)`.
 4. Save.
 
-The site is static and has no build step.
+There is no build step and no external rendering engine.
 
 ## Files
 
-- `index.html` — Asset Lab UI.
-- `styles.css` — desktop/mobile editor layout.
-- `app.js` — preview/editor behavior.
-- `assets/definitions.js` — Pack 01 asset definitions.
-- `assets/builders.js` — generic data-driven Babylon asset builder.
+- `index.html` — editor UI.
+- `styles.css` — desktop/mobile layout.
+- `app.js` — map editing, rendering, import/export, and preview logic.
+- `map/default-map.js` — starter map, layers, and placement palettes.
 
-The goal is for RiftCity to consume the same asset-definition format after an asset has been previewed and tuned here.
-
-## Pack 01 update
-
-`apartment-03f-01` now uses the rebuilt 165-part apartment definition with framed inset windows, proper balconies, a recessed entrance, roof detail, side windows and a multi-piece fire escape.
-
-## Phase 2 — real mesh proof
-
-`apartment-03f-01` is now a real embedded glTF model instead of a browser-generated primitive stack.
-
-- 5,078 vertices
-- 8,936 triangles
-- 10 PBR material groups
-- chamfered building mass and slabs
-- recessed framed windows
-- modeled balcony rails/supports
-- rooftop HVAC/vents
-- side/rear facade detail
-- modeled fire escape
-- mobile-targeted geometry
-
-The Asset Lab loads Babylon's glTF loader and can inspect/select the imported model's mesh/material groups. Primitive add/delete topology controls are intentionally disabled for real-model assets in this proof pass.
+The old Babylon/glTF asset-lab files were removed from the active project during the 2D conversion.

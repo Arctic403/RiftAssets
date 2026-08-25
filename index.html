@@ -3,167 +3,194 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#0b0d10">
-  <title>RiftAssets — Asset Lab</title>
+  <meta name="theme-color" content="#0a0c10">
+  <title>RiftMap — RiftCity 2D City Builder</title>
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
   <div id="app" class="app-shell">
     <header class="topbar">
       <div class="brand">
-        <span>RIFTASSETS</span>
-        <strong>ASSET LAB</strong>
+        <span>RIFTCITY</span>
+        <strong>2D MAP BUILDER</strong>
+      </div>
+
+      <div class="tool-strip" aria-label="Map tools">
+        <button class="mobile-only" id="library-toggle">LIBRARY</button>
+        <button class="tool active" data-tool="select" title="Select (V)">SELECT <kbd>V</kbd></button>
+        <button class="tool" data-tool="pan" title="Pan (H)">PAN <kbd>H</kbd></button>
+        <button class="tool" data-tool="road" title="Road (R)">ROAD <kbd>R</kbd></button>
+        <button class="tool" data-tool="building" title="Building (B)">BUILDING <kbd>B</kbd></button>
+        <button class="tool" data-tool="prop" title="Prop (P)">PROP <kbd>P</kbd></button>
+        <button class="tool" data-tool="zone" title="Zone (Z)">ZONE <kbd>Z</kbd></button>
+        <button class="tool" data-tool="interaction" title="Interaction (I)">INTERACT <kbd>I</kbd></button>
+        <button id="preview-toggle">▶ PREVIEW</button>
       </div>
 
       <div class="top-actions">
-        <button id="library-toggle" class="mobile-only">LIBRARY</button>
-        <button id="inspector-toggle" class="mobile-only">INSPECTOR</button>
-        <button data-mode="move" class="mode active" title="Move (W)">MOVE <kbd>W</kbd></button>
-        <button data-mode="rotate" class="mode" title="Rotate (E)">ROTATE <kbd>E</kbd></button>
-        <button data-mode="scale" class="mode" title="Scale (R)">SCALE <kbd>R</kbd></button>
+        <button id="undo-button" title="Undo">UNDO</button>
+        <button id="redo-button" title="Redo">REDO</button>
         <button id="grid-toggle" class="active">GRID</button>
-        <button id="wire-toggle">WIREFRAME</button>
-        <button id="bounds-toggle">BOUNDS</button>
-        <button id="light-toggle">NIGHT</button>
-        <button id="screenshot-button">PNG</button>
+        <button id="inspector-toggle" class="mobile-only">INSPECT</button>
       </div>
     </header>
 
-    <aside id="library-panel" class="panel library-panel">
+    <aside class="panel library-panel" id="library-panel">
       <div class="panel-head">
-        <div><span class="kicker">PACK 01</span><strong>Asset Library</strong></div>
+        <div>
+          <span class="kicker">CITY KIT</span>
+          <strong>Map Library</strong>
+        </div>
         <button class="panel-close mobile-only" data-close-panel="library">×</button>
       </div>
 
-      <label class="search-wrap">
-        <span>SEARCH</span>
-        <input id="asset-search" type="search" placeholder="building, car, prop…" autocomplete="off">
-      </label>
-
-      <div class="import-toolbar">
-        <button id="import-file-button" class="primary">IMPORT JSON</button>
-        <button id="import-paste-button">PASTE JSON</button>
-        <input id="asset-file-input" type="file" accept=".json,application/json" hidden>
-      </div>
-
-      <section id="import-panel" class="import-panel" hidden>
-        <span class="kicker">JSON IMPORTER</span>
-        <textarea id="import-json-input" spellcheck="false" placeholder='Paste an exported RiftAssets .asset.json here'></textarea>
-        <div class="import-actions">
-          <button id="import-apply-button" class="primary">LOAD ASSET</button>
-          <button id="import-cancel-button">CANCEL</button>
+      <section class="panel-section map-settings">
+        <div class="section-title"><span>MAP</span><small id="map-object-count">0 objects</small></div>
+        <div class="field-grid compact">
+          <label>WIDTH<input id="map-width" type="number" min="512" max="16384" step="128"></label>
+          <label>HEIGHT<input id="map-height" type="number" min="512" max="16384" step="128"></label>
+          <label>GRID<input id="grid-size" type="number" min="4" max="256" step="4"></label>
         </div>
-        <small id="import-status">Imports are validated before loading.</small>
+        <div class="two-buttons">
+          <button id="fit-map">FIT MAP</button>
+          <button id="clear-map" class="danger-ghost">CLEAR MAP</button>
+        </div>
       </section>
 
-      <div id="asset-list" class="asset-list"></div>
+      <section class="panel-section">
+        <div class="section-title"><span>LAYERS</span><small>tap to show/hide</small></div>
+        <div id="layer-list" class="layer-list"></div>
+      </section>
 
-      <div class="panel-footer panel-footer-three">
-        <button id="reset-asset">RESET ASSET</button>
-        <button id="remove-imported" class="danger-ghost">REMOVE IMPORT</button>
-        <button id="clear-drafts" class="danger-ghost">CLEAR DRAFTS</button>
-      </div>
+      <section class="panel-section palette-section">
+        <div class="section-title"><span id="palette-title">BUILDINGS</span><small id="palette-help">Choose a placement style</small></div>
+        <div id="palette-list" class="palette-list"></div>
+      </section>
+
+      <section class="panel-section">
+        <div class="section-title"><span>MAP JSON</span><small>RiftCity-ready format</small></div>
+        <div class="two-buttons">
+          <button id="import-json">IMPORT</button>
+          <button id="paste-json">PASTE</button>
+        </div>
+        <input id="import-file" type="file" accept=".json,application/json" hidden>
+        <button id="export-json" class="primary full-button">EXPORT MAP JSON</button>
+      </section>
+
+      <section id="paste-panel" class="panel-section paste-panel" hidden>
+        <span class="kicker">PASTE MAP JSON</span>
+        <textarea id="paste-input" spellcheck="false" placeholder='{"format":"riftcity-2d-map", ...}'></textarea>
+        <div class="two-buttons">
+          <button id="paste-apply" class="primary">LOAD</button>
+          <button id="paste-cancel">CANCEL</button>
+        </div>
+      </section>
+
+      <div class="panel-status" id="status">RiftMap ready.</div>
     </aside>
 
-    <main class="viewport">
-      <canvas id="preview-canvas" tabindex="0" aria-label="3D asset preview"></canvas>
+    <main class="viewport" id="viewport">
+      <canvas id="map-canvas" tabindex="0" aria-label="RiftCity 2D map editor"></canvas>
 
-      <div class="viewport-title">
-        <span id="asset-category">BUILDING</span>
-        <strong id="asset-name">Corner Store</strong>
-        <small id="asset-description">Loading…</small>
+      <div class="viewport-badge">
+        <span id="mode-label">SELECT</span>
+        <strong id="map-title">RiftCity Draft</strong>
+        <small id="cursor-readout">X 0 · Y 0 · 100%</small>
       </div>
 
-      <div class="scene-stats">
-        <div><span>MESHES</span><b id="stat-meshes">0</b></div>
-        <div><span>VERTS</span><b id="stat-verts">0</b></div>
-        <div><span>TRIS</span><b id="stat-tris">0</b></div>
+      <div class="minimap-wrap">
+        <canvas id="minimap" width="180" height="120" aria-label="Map minimap"></canvas>
       </div>
 
-      <div class="viewport-help">
-        <span>Drag = orbit</span><span>Wheel/pinch = zoom</span><span>Click part = select</span>
+      <div class="zoom-controls">
+        <button id="zoom-out" aria-label="Zoom out">−</button>
+        <button id="zoom-reset">100%</button>
+        <button id="zoom-in" aria-label="Zoom in">+</button>
+      </div>
+
+      <div class="preview-hud" id="preview-hud" hidden>
+        <div>
+          <span class="kicker">PLAY TEST</span>
+          <strong id="preview-position">X 0 · Y 0</strong>
+          <small id="nearby-interaction">Walk near an interaction marker.</small>
+        </div>
+        <button id="preview-exit">EXIT PREVIEW</button>
+      </div>
+
+      <div class="mobile-dpad" id="mobile-dpad" hidden aria-label="Preview movement controls">
+        <button data-move="up">▲</button>
+        <button data-move="left">◀</button>
+        <button data-move="down">▼</button>
+        <button data-move="right">▶</button>
       </div>
     </main>
 
-    <aside id="inspector-panel" class="panel inspector-panel">
+    <aside class="panel inspector-panel" id="inspector-panel">
       <div class="panel-head">
-        <div><span class="kicker">EDIT</span><strong>Inspector</strong></div>
+        <div>
+          <span class="kicker">OBJECT</span>
+          <strong>Inspector</strong>
+        </div>
         <button class="panel-close mobile-only" data-close-panel="inspector">×</button>
       </div>
 
-      <section class="inspector-section">
-        <span class="kicker">SELECTED PART</span>
-        <strong id="selected-part-name">Nothing selected</strong>
-        <small id="selected-part-type">Click a part of the asset.</small>
+      <section class="panel-section">
+        <span class="kicker">SELECTED</span>
+        <strong id="selected-name">Nothing selected</strong>
+        <small id="selected-meta">Choose SELECT, then tap an object.</small>
       </section>
 
-      <section id="model-asset-note" class="inspector-section model-asset-note" hidden>
-        <span class="kicker">REAL MODEL ASSET</span>
-        <strong>glTF mesh preview</strong>
-        <small>This asset is loaded from a real model file. You can inspect/select its material mesh groups and adjust transforms/materials, but topology is no longer generated from browser boxes.</small>
-      </section>
-
-      <section class="inspector-section">
-        <div class="section-title">
-          <span>PARTS</span>
-          <div>
-            <button id="add-box" class="mini">+ BOX</button>
-            <button id="add-cylinder" class="mini">+ CYL</button>
-            <button id="add-sphere" class="mini">+ SPHERE</button>
-          </div>
-        </div>
-        <div id="parts-list" class="parts-list"></div>
-      </section>
-
-      <section class="inspector-section">
-        <span class="kicker">TRANSFORM</span>
+      <section class="panel-section" id="inspector-fields">
         <div class="field-grid">
-          <label>X<input data-field="x" type="number" step="0.1"></label>
-          <label>Y<input data-field="y" type="number" step="0.1"></label>
-          <label>Z<input data-field="z" type="number" step="0.1"></label>
-
-          <label>RX<input data-field="rx" type="number" step="1"></label>
-          <label>RY<input data-field="ry" type="number" step="1"></label>
-          <label>RZ<input data-field="rz" type="number" step="1"></label>
-
-          <label>SX<input data-field="sx" type="number" min="0.05" step="0.05"></label>
-          <label>SY<input data-field="sy" type="number" min="0.05" step="0.05"></label>
-          <label>SZ<input data-field="sz" type="number" min="0.05" step="0.05"></label>
+          <label>X<input data-field="x" type="number" step="1"></label>
+          <label>Y<input data-field="y" type="number" step="1"></label>
+          <label>WIDTH<input data-field="width" type="number" min="1" step="1"></label>
+          <label>HEIGHT<input data-field="height" type="number" min="1" step="1"></label>
+          <label>ROTATE<input data-field="rotation" type="number" step="1"></label>
+          <label>ROAD W<input data-field="roadWidth" type="number" min="4" step="2"></label>
         </div>
-      </section>
 
-      <section class="inspector-section">
-        <span class="kicker">MATERIAL</span>
-        <div class="material-row">
-          <label>COLOR<input id="part-color" type="color" value="#777777"></label>
-          <label>ROUGH<input id="part-roughness" type="range" min="0" max="1" step="0.05" value="0.8"></label>
-          <label>METAL<input id="part-metallic" type="range" min="0" max="1" step="0.05" value="0"></label>
+        <label class="stack-label">LABEL<input id="object-label" type="text" maxlength="60"></label>
+
+        <div class="field-grid compact">
+          <label>COLOR<input id="object-color" type="color"></label>
+          <label>LAYER
+            <select id="object-layer">
+              <option value="roads">Roads</option>
+              <option value="lots">Lots</option>
+              <option value="buildings">Buildings</option>
+              <option value="props">Props</option>
+              <option value="zones">Zones</option>
+              <option value="interactions">Interactions</option>
+            </select>
+          </label>
         </div>
+
+        <label class="check-row">
+          <input id="object-collision" type="checkbox">
+          <span>Blocks player movement</span>
+        </label>
       </section>
 
-      <section class="inspector-section button-grid">
-        <button id="duplicate-part">DUPLICATE</button>
-        <button id="hide-part">HIDE</button>
-        <button id="delete-part" class="danger">DELETE</button>
-        <button id="focus-part">FOCUS</button>
+      <section class="panel-section button-grid">
+        <button id="duplicate-object">DUPLICATE</button>
+        <button id="center-object">CENTER VIEW</button>
+        <button id="raise-object">MOVE UP</button>
+        <button id="lower-object">MOVE DOWN</button>
+        <button id="delete-object" class="danger">DELETE</button>
       </section>
 
-      <section class="inspector-section history-row">
-        <button id="undo-button">UNDO <kbd>⌘Z</kbd></button>
-        <button id="redo-button">REDO</button>
-      </section>
-
-      <section class="inspector-section export-section">
-        <button id="export-json" class="primary">EXPORT ASSET JSON</button>
-        <button id="copy-json">COPY JSON</button>
-        <textarea id="export-output" hidden spellcheck="false" aria-label="Exported asset JSON"></textarea>
-        <small id="lab-status">Asset Lab ready.</small>
+      <section class="panel-section help-card">
+        <span class="kicker">CONTROLS</span>
+        <small>
+          Mouse: wheel zoom · middle/right drag pan · SELECT drag moves objects.<br>
+          Keyboard: V/H/R/B/P/Z/I tools · arrows nudge · Shift = 4× · Delete removes · Cmd/Ctrl+Z undo.<br>
+          Mobile: PAN tool drags map · pinch zoom · SELECT drags objects.
+        </small>
       </section>
     </aside>
   </div>
 
-  <script src="https://cdn.babylonjs.com/babylon.js"></script>
-  <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
   <script type="module" src="./app.js"></script>
 </body>
 </html>
