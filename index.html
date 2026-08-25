@@ -25,6 +25,7 @@
         <button class="tool" data-tool="zone" title="Zone (Z)">ZONE <kbd>Z</kbd></button>
         <button class="tool" data-tool="interaction" title="Interaction (I)">INTERACT <kbd>I</kbd></button>
         <button id="preview-toggle">▶ WALK</button>
+        <button id="asset-lab-toggle">ASSET LAB</button>
       </div>
 
       <div class="view-actions">
@@ -143,6 +144,79 @@
         <button data-move="down">▼</button>
         <button data-move="right">▶</button>
       </div>
+
+      <section class="asset-lab" id="asset-lab" hidden>
+        <header class="asset-lab-head">
+          <div>
+            <span class="kicker">RIFTCITY ART WORKSHOP</span>
+            <strong>Storefront Asset Lab</strong>
+            <small>Import generated PNG / WebP / SVG art, tune it live, compare assets, then export the pack.</small>
+          </div>
+          <button id="asset-lab-close">CLOSE</button>
+        </header>
+
+        <div class="asset-lab-layout">
+          <aside class="asset-library">
+            <div class="section-title"><span>ASSET LIBRARY</span><small id="asset-count">0 assets</small></div>
+            <button id="asset-import" class="primary full-button">IMPORT ART</button>
+            <input id="asset-import-file" type="file" accept="image/png,image/webp,image/jpeg,image/svg+xml" multiple hidden>
+            <div id="asset-list" class="asset-list"></div>
+            <div class="two-buttons">
+              <button id="asset-duplicate">DUPLICATE</button>
+              <button id="asset-delete" class="danger">DELETE</button>
+            </div>
+          </aside>
+
+          <main class="asset-stage-shell">
+            <div class="asset-stage-toolbar">
+              <div class="segmented asset-bg-buttons">
+                <button data-asset-bg="checker" class="active">CHECKER</button>
+                <button data-asset-bg="street">STREET</button>
+                <button data-asset-bg="night">NIGHT</button>
+              </div>
+              <span id="asset-stage-readout">No asset loaded</span>
+            </div>
+            <div class="asset-stage-viewport" id="asset-stage-viewport">
+              <canvas id="asset-stage" width="1200" height="800" tabindex="0"></canvas>
+              <div class="asset-safe-line"><span>GROUND / SIDEWALK</span></div>
+            </div>
+            <div class="asset-stage-help">Drag artwork to position · pinch/wheel to scale · inspector values update live</div>
+          </main>
+
+          <aside class="asset-inspector">
+            <div class="section-title"><span>ASSET INSPECTOR</span><small>live edit</small></div>
+            <label class="stack-label">NAME<input id="asset-name" type="text" maxlength="80" placeholder="Corner Mart"></label>
+            <label class="stack-label">ASSET ID<input id="asset-id" type="text" maxlength="100" placeholder="building.corner-mart.a"></label>
+            <div class="field-grid">
+              <label>X<input id="asset-x" type="number" step="1"></label>
+              <label>Y<input id="asset-y" type="number" step="1"></label>
+              <label>SCALE<input id="asset-scale" type="number" min=".05" max="8" step=".05"></label>
+              <label>ROTATE<input id="asset-rotation" type="number" min="-180" max="180" step="1"></label>
+              <label>OPACITY<input id="asset-opacity" type="number" min=".1" max="1" step=".05"></label>
+              <label>GROUND Y<input id="asset-ground-y" type="number" min="0" max="800" step="1"></label>
+            </div>
+            <label class="stack-label">PREVIEW SIZE
+              <select id="asset-preview-size">
+                <option value="1200x800">1200 × 800 storefront</option>
+                <option value="1600x900">1600 × 900 wide</option>
+                <option value="900x1200">900 × 1200 tall</option>
+              </select>
+            </label>
+            <label class="check-row"><input id="asset-shadow" type="checkbox" checked><span>Preview ground shadow</span></label>
+            <label class="check-row"><input id="asset-guide" type="checkbox" checked><span>Show ground guide</span></label>
+            <div class="two-buttons">
+              <button id="asset-reset-transform">RESET</button>
+              <button id="asset-fit">FIT ART</button>
+            </div>
+            <button id="asset-export-png" class="primary full-button">EXPORT PREVIEW PNG</button>
+            <button id="asset-export-pack" class="full-button">EXPORT ASSET PACK JSON</button>
+            <button id="asset-import-pack" class="full-button">IMPORT ASSET PACK JSON</button>
+            <input id="asset-pack-file" type="file" accept=".json,application/json" hidden>
+            <small class="field-note">The asset-pack JSON includes the imported artwork as data URLs plus your live transform settings, so you can send one file back for integration.</small>
+          </aside>
+        </div>
+      </section>
+
     </main>
 
     <aside class="panel inspector-panel" id="inspector-panel">

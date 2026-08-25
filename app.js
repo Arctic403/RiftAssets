@@ -2,6 +2,7 @@ import { MAP_LAYERS, PALETTES, createStarterMap } from './map/default-map.js';
 import { BUILDING_STYLES, PROP_STYLES, INTERACTION_STYLES, styleForBuilding, shadeHex } from './map/world-kit.js';
 
 const STORAGE_KEY='riftcity-2d-map-draft-ground-v2';
+const ASSET_LAB_KEY='riftcity-asset-lab-v1';
 const groundImage=new Image();
 groundImage.src='./assets/downtown-ground.svg';
 const $=selector=>document.querySelector(selector);
@@ -43,6 +44,19 @@ const state={
   lastFrame:performance.now()
 };
 
+const assetLab={
+  open:false,
+  assets:[],
+  selectedId:null,
+  background:'checker',
+  width:1200,
+  height:800,
+  dragging:false,
+  dragPointer:null,
+  dragStart:null,
+  imageCache:new Map()
+};
+
 init();
 
 function init(){
@@ -61,6 +75,7 @@ function init(){
   document.body.classList.remove('walk-active');
   refreshInspector();
   refreshStats();
+  initAssetLab();
   resizeCanvas();
   requestAnimationFrame(()=>{
     fitMap();
@@ -184,6 +199,7 @@ function bindUi(){
   });
 
   window.addEventListener('keydown',event=>{
+    if(assetLab.open)return;
     if(['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName))return;
     state.keys.add(event.code);
     const mod=event.ctrlKey||event.metaKey;
@@ -198,6 +214,362 @@ function bindUi(){
     }
   });
   window.addEventListener('keyup',event=>state.keys.delete(event.code));
+}
+
+
+function initAssetLab(){
+  try{
+    const saved=JSON.parse(localStorage.getItem(ASSET_LAB_KEY)||'null');
+    if(saved?.format==='riftcity-asset-lab'&&Array.isArray(saved.assets)){
+      assetLab.assets=saved.assets;
+      assetLab.selectedId=saved.selectedId||saved.assets[0]?.id||null;
+      assetLab.background=saved.background||'checker';
+      assetLab.width=Number(saved.width)||1200;
+      assetLab.height=Number(saved.height)||800;
+    }
+  }catch(_){}
+
+  $('#asset-lab-toggle').addEventListener('click',()=>setAssetLabOpen(true));
+  $('#asset-lab-close').addEventListener('click',()=>setAssetLabOpen(false));
+  $('#asset-import').addEventListener('click',()=>$('#asset-import-file').click());
+  $('#asset-import-file').addEventListener('change',importAssetFiles);
+  $('#asset-duplicate').addEventListener('click',duplicateAsset);
+  $('#asset-delete').addEventListener('click',deleteAsset);
+  $('#asset-reset-transform').addEventListener('click',resetAssetTransform);
+  $('#asset-fit').addEventListener('click',fitSelectedAsset);
+  $('#asset-export-png').addEventListener('click',exportAssetPreviewPng);
+  $('#asset-export-pack').addEventListener('click',exportAssetPack);
+  $('#asset-import-pack').addEventListener('click',()=>$('#asset-pack-file').click());
+  $('#asset-pack-file').addEventListener('change',importAssetPack);
+
+  document.querySelectorAll('[data-asset-bg]').forEach(button=>{
+    button.addEventListener('click',()=>{
+      assetLab.background=button.dataset.assetBg;
+      document.querySelectorAll('[data-asset-bg]').forEach(b=>b.classList.toggle('active',b===button));
+      saveAssetLab();
+      drawAssetStage();
+    });
+  });
+
+  for(const id of ['asset-name','asset-id','asset-x','asset-y','asset-scale','asset-rotation','asset-opacity','asset-ground-y']){
+    $('#'+id).addEventListener('input',applyAssetInspector);
+  }
+  $('#asset-shadow').addEventListener('change',applyAssetInspector);
+  $('#asset-guide').addEventListener('change',()=>{
+    $('#asset-lab').classList.toggle('hide-ground-guide',!$('#asset-guide').checked);
+  });
+  $('#asset-preview-size').addEventListener('change',event=>{
+    const [w,h]=event.target.value.split('x').map(Number);
+    assetLab.width=w;assetLab.height=h;
+    const stage=$('#asset-stage');stage.width=w;stage.height=h;
+    saveAssetLab();fitSelectedAsset();renderAssetLab();
+  });
+
+  const stage=$('#asset-stage');
+  stage.addEventListener('pointerdown',assetPointerDown);
+  stage.addEventListener('pointermove',assetPointerMove);
+  stage.addEventListener('pointerup',assetPointerUp);
+  stage.addEventListener('pointercancel',assetPointerUp);
+  stage.addEventListener('wheel',event=>{
+    if(!selectedAsset())return;
+    event.preventDefault();
+    const a=selectedAsset();
+    a.scale=clamp(a.scale*Math.exp(-event.deltaY*.0015),.05,8);
+    syncAssetInspector();saveAssetLab();drawAssetStage();
+  },{passive:false});
+
+  const sizeValue=`${assetLab.width}x${assetLab.height}`;
+  if([...$('#asset-preview-size').options].some(o=>o.value===sizeValue))$('#asset-preview-size').value=sizeValue;
+  stage.width=assetLab.width;stage.height=assetLab.height;
+  renderAssetLab();
+}
+
+function setAssetLabOpen(open){
+  assetLab.open=!!open;
+  $('#asset-lab').hidden=!open;
+  document.body.classList.toggle('asset-lab-open',open);
+  $('#asset-lab-toggle').classList.toggle('active',open);
+  if(open){
+    state.preview=false;
+    document.body.classList.remove('walk-active');
+    $('#preview-hud').hidden=true;
+    $('#mobile-dpad').hidden=true;
+    renderAssetLab();
+    requestAnimationFrame(drawAssetStage);
+  }
+}
+
+function assetId(){
+  return `asset-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,7)}`;
+}
+
+function selectedAsset(){
+  return assetLab.assets.find(a=>a.id===assetLab.selectedId)||null;
+}
+
+async function importAssetFiles(event){
+  const list=[...(event.target.files||[])];
+  for(const file of list){
+    if(!/^image\//.test(file.type))continue;
+    const dataUrl=await fileToDataUrl(file);
+    const dimensions=await imageDimensions(dataUrl);
+    const item={
+      id:assetId(),
+      name:file.name.replace(/\.[^.]+$/,'').replace(/[-_]+/g,' '),
+      assetId:`building.${file.name.replace(/\.[^.]+$/,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')}.a`,
+      fileName:file.name,
+      mime:file.type||'image/png',
+      src:dataUrl,
+      sourceWidth:dimensions.width,
+      sourceHeight:dimensions.height,
+      x:assetLab.width/2,
+      y:Math.round(assetLab.height*.74),
+      scale:1,
+      rotation:0,
+      opacity:1,
+      groundY:Math.round(assetLab.height*.78),
+      shadow:true
+    };
+    assetLab.assets.push(item);
+    assetLab.selectedId=item.id;
+    await ensureAssetImage(item);
+    fitSelectedAsset(false);
+  }
+  event.target.value='';
+  saveAssetLab();renderAssetLab();
+  say(`${list.length} artwork file${list.length===1?'':'s'} imported into Asset Lab.`);
+}
+
+function fileToDataUrl(file){
+  return new Promise((resolve,reject)=>{
+    const r=new FileReader();r.onload=()=>resolve(String(r.result));r.onerror=()=>reject(r.error);r.readAsDataURL(file);
+  });
+}
+function imageDimensions(src){
+  return new Promise((resolve,reject)=>{
+    const img=new Image();img.onload=()=>resolve({width:img.naturalWidth,height:img.naturalHeight});img.onerror=reject;img.src=src;
+  });
+}
+function ensureAssetImage(asset){
+  if(!asset)return Promise.resolve(null);
+  const cached=assetLab.imageCache.get(asset.id);
+  if(cached?.complete)return Promise.resolve(cached);
+  return new Promise((resolve,reject)=>{
+    const img=new Image();img.onload=()=>{assetLab.imageCache.set(asset.id,img);resolve(img);drawAssetStage();};
+    img.onerror=reject;img.src=asset.src;
+  });
+}
+
+function renderAssetLab(){
+  $('#asset-count').textContent=`${assetLab.assets.length} asset${assetLab.assets.length===1?'':'s'}`;
+  $('#asset-list').innerHTML=assetLab.assets.length?assetLab.assets.map(asset=>`
+    <button class="asset-list-item ${asset.id===assetLab.selectedId?'active':''}" data-asset-select="${escapeAttr(asset.id)}">
+      <span class="asset-thumb"><img src="${asset.src}" alt=""></span>
+      <span><strong>${escapeHtml(asset.name||'Untitled asset')}</strong><small>${escapeHtml(asset.assetId||'No asset ID')}</small></span>
+    </button>
+  `).join(''):'<div class="asset-empty">Import the first transparent storefront image.</div>';
+  document.querySelectorAll('[data-asset-select]').forEach(button=>{
+    button.addEventListener('click',()=>{
+      assetLab.selectedId=button.dataset.assetSelect;
+      syncAssetInspector();saveAssetLab();renderAssetLab();drawAssetStage();
+    });
+  });
+
+  document.querySelectorAll('[data-asset-bg]').forEach(button=>button.classList.toggle('active',button.dataset.assetBg===assetLab.background));
+  syncAssetInspector();
+  $('#asset-duplicate').disabled=!selectedAsset();
+  $('#asset-delete').disabled=!selectedAsset();
+  $('#asset-export-png').disabled=!selectedAsset();
+  drawAssetStage();
+}
+
+function syncAssetInspector(){
+  const a=selectedAsset();
+  const values={
+    'asset-name':a?.name||'','asset-id':a?.assetId||'',
+    'asset-x':a?round(a.x):'','asset-y':a?round(a.y):'',
+    'asset-scale':a?Number(a.scale||1).toFixed(2):'',
+    'asset-rotation':a?round(a.rotation||0):'',
+    'asset-opacity':a?Number(a.opacity??1).toFixed(2):'',
+    'asset-ground-y':a?round(a.groundY??assetLab.height*.78):''
+  };
+  for(const [id,value] of Object.entries(values)){
+    $('#'+id).value=value;$('#'+id).disabled=!a;
+  }
+  $('#asset-shadow').checked=!!a?.shadow;
+  $('#asset-shadow').disabled=!a;
+  $('#asset-stage-readout').textContent=a?`${a.sourceWidth}×${a.sourceHeight} source · ${Math.round((a.scale||1)*100)}%`:'No asset loaded';
+}
+
+function applyAssetInspector(){
+  const a=selectedAsset();if(!a)return;
+  a.name=$('#asset-name').value.slice(0,80);
+  a.assetId=$('#asset-id').value.slice(0,100);
+  a.x=clamp(Number($('#asset-x').value)||0,-assetLab.width,assetLab.width*2);
+  a.y=clamp(Number($('#asset-y').value)||0,-assetLab.height,assetLab.height*2);
+  a.scale=clamp(Number($('#asset-scale').value)||1,.05,8);
+  a.rotation=clamp(Number($('#asset-rotation').value)||0,-180,180);
+  a.opacity=clamp(Number($('#asset-opacity').value)||1,.1,1);
+  a.groundY=clamp(Number($('#asset-ground-y').value)||assetLab.height*.78,0,assetLab.height);
+  a.shadow=$('#asset-shadow').checked;
+  saveAssetLab();renderAssetLab();
+}
+
+function fitSelectedAsset(center=true){
+  const a=selectedAsset();if(!a)return;
+  const maxW=assetLab.width*.72,maxH=assetLab.height*.68;
+  a.scale=Math.min(maxW/Math.max(1,a.sourceWidth),maxH/Math.max(1,a.sourceHeight));
+  if(center){a.x=assetLab.width/2;a.y=assetLab.height*.77;}
+  a.groundY=assetLab.height*.79;
+  syncAssetInspector();saveAssetLab();drawAssetStage();
+}
+
+function resetAssetTransform(){
+  const a=selectedAsset();if(!a)return;
+  a.x=assetLab.width/2;a.y=assetLab.height*.77;a.rotation=0;a.opacity=1;a.shadow=true;
+  fitSelectedAsset(false);saveAssetLab();renderAssetLab();
+}
+
+function duplicateAsset(){
+  const a=selectedAsset();if(!a)return;
+  const copy=clone(a);copy.id=assetId();copy.name=`${a.name} Copy`;copy.assetId=`${a.assetId}.copy`;
+  copy.x+=35;copy.y+=20;assetLab.assets.push(copy);assetLab.selectedId=copy.id;
+  saveAssetLab();renderAssetLab();
+}
+function deleteAsset(){
+  const a=selectedAsset();if(!a)return;
+  assetLab.assets=assetLab.assets.filter(x=>x.id!==a.id);assetLab.imageCache.delete(a.id);
+  assetLab.selectedId=assetLab.assets[0]?.id||null;saveAssetLab();renderAssetLab();
+}
+
+function assetPointerDown(event){
+  const a=selectedAsset();if(!a)return;
+  const p=assetPointerPosition(event);
+  if(!assetHit(a,p.x,p.y))return;
+  event.preventDefault();
+  $('#asset-stage').setPointerCapture?.(event.pointerId);
+  assetLab.dragging=true;assetLab.dragPointer=event.pointerId;
+  assetLab.dragStart={clientX:event.clientX,clientY:event.clientY,x:a.x,y:a.y};
+}
+function assetPointerMove(event){
+  if(!assetLab.dragging||event.pointerId!==assetLab.dragPointer)return;
+  const a=selectedAsset();if(!a)return;
+  const rect=$('#asset-stage').getBoundingClientRect();
+  const sx=assetLab.width/rect.width,sy=assetLab.height/rect.height;
+  a.x=assetLab.dragStart.x+(event.clientX-assetLab.dragStart.clientX)*sx;
+  a.y=assetLab.dragStart.y+(event.clientY-assetLab.dragStart.clientY)*sy;
+  syncAssetInspector();drawAssetStage();
+}
+function assetPointerUp(event){
+  if(event.pointerId!==assetLab.dragPointer)return;
+  assetLab.dragging=false;assetLab.dragPointer=null;assetLab.dragStart=null;saveAssetLab();
+}
+function assetPointerPosition(event){
+  const rect=$('#asset-stage').getBoundingClientRect();
+  return{x:(event.clientX-rect.left)*assetLab.width/rect.width,y:(event.clientY-rect.top)*assetLab.height/rect.height};
+}
+function assetHit(a,x,y){
+  const w=a.sourceWidth*a.scale,h=a.sourceHeight*a.scale;
+  return x>=a.x-w/2&&x<=a.x+w/2&&y>=a.y-h&&y<=a.y+20;
+}
+
+function drawAssetStage(){
+  if(!$('#asset-stage'))return;
+  const stage=$('#asset-stage'),c=stage.getContext('2d');
+  c.clearRect(0,0,stage.width,stage.height);
+  drawAssetBackground(c,stage.width,stage.height);
+  const a=selectedAsset();
+  if(!a){
+    c.fillStyle='#aab2b7';c.font='700 28px system-ui';c.textAlign='center';
+    c.fillText('IMPORT A STOREFRONT ASSET',stage.width/2,stage.height/2);
+    return;
+  }
+  const img=assetLab.imageCache.get(a.id);
+  if(!img){ensureAssetImage(a).catch(()=>{});return;}
+  const w=a.sourceWidth*a.scale,h=a.sourceHeight*a.scale;
+  c.save();
+  if(a.shadow){
+    c.fillStyle='rgba(0,0,0,.28)';
+    c.beginPath();c.ellipse(a.x,a.groundY+10,Math.max(40,w*.34),Math.max(10,w*.055),0,0,Math.PI*2);c.fill();
+  }
+  c.globalAlpha=a.opacity??1;
+  c.translate(a.x,a.y);
+  c.rotate((a.rotation||0)*Math.PI/180);
+  c.drawImage(img,-w/2,-h,w,h);
+  c.restore();
+
+  c.save();c.strokeStyle='#d78e36';c.setLineDash([8,6]);c.lineWidth=2;
+  c.strokeRect(a.x-w/2,a.y-h,w,h);c.restore();
+}
+
+function drawAssetBackground(c,w,h){
+  if(assetLab.background==='checker'){
+    const s=32;
+    for(let y=0;y<h;y+=s)for(let x=0;x<w;x+=s){
+      c.fillStyle=((x/s+y/s)&1)?'#20262b':'#161b20';c.fillRect(x,y,s,s);
+    }
+  }else if(assetLab.background==='street'){
+    c.fillStyle='#9baeb5';c.fillRect(0,0,w,h*.52);
+    c.fillStyle='#c1beb2';c.fillRect(0,h*.52,w,h*.24);
+    c.fillStyle='#373c3f';c.fillRect(0,h*.76,w,h*.24);
+    c.strokeStyle='#d9cf85';c.lineWidth=4;c.setLineDash([28,22]);c.beginPath();c.moveTo(0,h*.90);c.lineTo(w,h*.90);c.stroke();c.setLineDash([]);
+  }else{
+    const g=c.createLinearGradient(0,0,0,h);g.addColorStop(0,'#102033');g.addColorStop(.55,'#27333a');g.addColorStop(.56,'#88867e');g.addColorStop(.77,'#88867e');g.addColorStop(.78,'#22282d');g.addColorStop(1,'#11161b');c.fillStyle=g;c.fillRect(0,0,w,h);
+    c.fillStyle='#e2c77b18';for(let x=40;x<w;x+=180)c.fillRect(x,h*.54,3,h*.18);
+  }
+  c.strokeStyle='rgba(255,255,255,.18)';c.lineWidth=2;c.beginPath();c.moveTo(0,h*.79);c.lineTo(w,h*.79);c.stroke();
+}
+
+function saveAssetLab(){
+  try{
+    localStorage.setItem(ASSET_LAB_KEY,JSON.stringify({
+      format:'riftcity-asset-lab',version:1,
+      selectedId:assetLab.selectedId,background:assetLab.background,width:assetLab.width,height:assetLab.height,
+      assets:assetLab.assets
+    }));
+  }catch(error){
+    console.warn('Asset Lab local save failed',error);
+  }
+}
+
+function exportAssetPack(){
+  const pack={
+    format:'riftcity-asset-pack',version:1,
+    exportedAt:new Date().toISOString(),
+    preview:{width:assetLab.width,height:assetLab.height,background:assetLab.background},
+    assets:assetLab.assets
+  };
+  downloadText(JSON.stringify(pack,null,2),'riftcity-storefront-assets.json','application/json');
+}
+async function importAssetPack(event){
+  const file=event.target.files?.[0];if(!file)return;
+  try{
+    const raw=JSON.parse(await file.text());
+    if(raw?.format!=='riftcity-asset-pack'||!Array.isArray(raw.assets))throw new Error('Not a RiftCity asset pack.');
+    assetLab.assets=raw.assets.slice(0,100);
+    assetLab.width=clamp(Number(raw.preview?.width)||1200,400,2400);
+    assetLab.height=clamp(Number(raw.preview?.height)||800,300,1800);
+    assetLab.background=raw.preview?.background||'checker';
+    assetLab.selectedId=assetLab.assets[0]?.id||null;
+    const stage=$('#asset-stage');stage.width=assetLab.width;stage.height=assetLab.height;
+    assetLab.imageCache.clear();
+    saveAssetLab();renderAssetLab();say(`Loaded ${assetLab.assets.length} storefront assets.`);
+  }catch(error){say(`Asset pack import failed: ${error.message}`);}
+  event.target.value='';
+}
+function exportAssetPreviewPng(){
+  const a=selectedAsset();if(!a)return;
+  const stage=$('#asset-stage');
+  stage.toBlob(blob=>{
+    if(!blob)return;
+    const url=URL.createObjectURL(blob),link=document.createElement('a');
+    link.href=url;link.download=`${(a.assetId||a.name||'riftcity-asset').replace(/[^a-z0-9._-]+/gi,'-')}-preview.png`;
+    link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  },'image/png');
+}
+function downloadText(text,name,type){
+  const blob=new Blob([text],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 
 function resizeCanvas(){

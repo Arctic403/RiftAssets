@@ -82,3 +82,22 @@ No map conversion is required to continue editing existing version 2 exports.
 - `map/world-kit.js` — shared building/prop/interaction style metadata.
 
 Static GitHub Pages project. No build step.
+
+
+## Phase A1 — Storefront Asset Lab
+
+RiftAssets now includes a dedicated `ASSET LAB` for the new RiftCity 2.5D storefront workflow. It exists alongside the older map reviewer so generated building artwork can be tested before it is integrated into the game.
+
+Asset Lab supports:
+- importing transparent PNG, WebP, JPEG or SVG artwork directly in GitHub Pages;
+- a persistent local browser asset library;
+- live drag positioning;
+- wheel/pinch-style scale tuning plus numeric X/Y/scale/rotation/opacity controls;
+- configurable ground/baseline placement and optional ground shadow;
+- checkerboard, simple daytime street and night-street preview backgrounds;
+- multiple preview aspect ratios;
+- duplication/deletion and quick reset/fit controls;
+- flattened preview PNG export;
+- a single `riftcity-asset-pack` JSON export that embeds the imported artwork as data URLs together with every transform setting.
+
+The intended workflow is now: generate one storefront asset → import it into Asset Lab → tune/compare it live → repeat for the six Commerce Street buildings → export the asset-pack JSON → send that JSON with the newest RiftCity workspace for runtime integration.
