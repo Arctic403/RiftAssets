@@ -4,7 +4,7 @@ import { BUILDING_STYLES, PROP_STYLES, INTERACTION_STYLES, styleForBuilding, sha
 const STORAGE_KEY='riftcity-25d-map-draft-v2';
 const ISO_X=.5;
 const ISO_Y=.25;
-const FLOOR_HEIGHT=44;
+const FLOOR_HEIGHT=50;
 const $=selector=>document.querySelector(selector);
 const canvas=$('#map-canvas');
 const minimap=$('#minimap');
@@ -61,7 +61,7 @@ function init(){
   refreshStats();
   resizeCanvas();
   requestAnimationFrame(()=>{
-    fitMap();
+    focusCurrentView(true);
     requestAnimationFrame(frame);
   });
 }
@@ -134,8 +134,11 @@ function bindUi(){
   $('#zoom-in').addEventListener('click',()=>zoomAt(canvas.clientWidth/2,canvas.clientHeight/2,1.2));
   $('#zoom-out').addEventListener('click',()=>zoomAt(canvas.clientWidth/2,canvas.clientHeight/2,1/1.2));
   $('#zoom-reset').addEventListener('click',()=>{
-    state.camera.zoom=1;
-    updateZoomLabel();
+    if(state.view==='iso')ensureIsoReviewZoom(true);
+    else{
+      state.camera.zoom=1;
+      updateZoomLabel();
+    }
   });
 
   canvas.addEventListener('contextmenu',event=>event.preventDefault());
@@ -211,17 +214,26 @@ function resizeCanvas(){
     canvas.width=width;
     canvas.height=height;
     ctx.setTransform(state.dpr,0,0,state.dpr,0,0);
+    if(state.view==='iso'&&state.camera.zoom>0)ensureIsoReviewZoom();
   }
 }
 
 function setView(view,announce=true){
   if(view!=='plan'&&view!=='iso')return;
+  const previous=state.view;
   state.view=view;
   $('#view-plan').classList.toggle('active',view==='plan');
   $('#view-iso').classList.toggle('active',view==='iso');
+
+  if(view==='plan'){
+    if(previous!=='plan')fitMap();
+  }else if(previous!=='iso'){
+    ensureIsoReviewZoom();
+  }
+
   updateModeLabel();
   updateZoomLabel();
-  if(announce)say(view==='iso'?'2.5D review view. Use PLAN when you need precise footprints.':'Plan view. Use 2.5D to judge the in-game look.');
+  if(announce)say(view==='iso'?'2.5D neighborhood review. Pan around the district; FIT MAP is only for an intentional full-city overview.':'Plan overview. The full district is fitted for layout work.');
 }
 
 function toggleLighting(){
@@ -479,7 +491,7 @@ function updatePointer(event){
 
 function zoomAt(screenX,screenY,factor){
   const before=screenToWorld(screenX,screenY);
-  state.camera.zoom=clamp(state.camera.zoom*factor,.12,4);
+  state.camera.zoom=clamp(state.camera.zoom*factor,.08,4);
   const after=screenToWorld(screenX,screenY);
   state.camera.x+=before.x-after.x;
   state.camera.y+=before.y-after.y;
@@ -491,6 +503,48 @@ function updateZoomLabel(){
   $('#zoom-reset').textContent=`${Math.round(state.camera.zoom*100)}%`;
 }
 
+function preferredIsoZoom(){
+  const width=canvas.clientWidth||window.innerWidth||390;
+  if(width<=430)return .40;
+  if(width<=700)return .44;
+  if(width<=980)return .48;
+  return .56;
+}
+
+function preferredWalkZoom(){
+  const width=canvas.clientWidth||window.innerWidth||390;
+  if(width<=430)return .52;
+  if(width<=700)return .56;
+  return .62;
+}
+
+function ensureIsoReviewZoom(force=false){
+  const preferred=preferredIsoZoom();
+  if(force||state.camera.zoom<preferred*.82||state.camera.zoom>preferred*2.2){
+    state.camera.zoom=preferred;
+  }
+  clampCamera();
+  updateZoomLabel();
+}
+
+function focusIsoReview(target=null,walk=false){
+  const focus=target||state.selected&&objectCenter(state.selected)||state.map.playerSpawn||{x:state.map.width/2,y:state.map.height/2};
+  state.camera.x=clamp(Number(focus.x)||state.map.width/2,0,state.map.width);
+  state.camera.y=clamp(Number(focus.y)||state.map.height/2,0,state.map.height);
+  state.camera.zoom=walk?preferredWalkZoom():preferredIsoZoom();
+  clampCamera();
+  updateZoomLabel();
+}
+
+function focusCurrentView(initial=false){
+  if(state.view==='plan'){
+    fitMap();
+    return;
+  }
+  const target=initial?(state.map.playerSpawn||{x:state.map.width/2,y:state.map.height/2}):null;
+  focusIsoReview(target,false);
+}
+
 function fitMap(){
   const rect=canvas.getBoundingClientRect();
   const padding=Math.min(120,Math.max(56,rect.width*.12));
@@ -499,13 +553,14 @@ function fitMap(){
     zoom=Math.min((rect.width-padding)/state.map.width,(rect.height-padding)/state.map.height);
   }else{
     const projectedW=(state.map.width+state.map.height)*ISO_X;
-    const projectedH=(state.map.width+state.map.height)*ISO_Y+420;
+    const projectedH=(state.map.width+state.map.height)*ISO_Y+520;
     zoom=Math.min((rect.width-padding)/projectedW,(rect.height-padding)/projectedH);
   }
-  state.camera.zoom=clamp(zoom,.12,2.5);
+  state.camera.zoom=clamp(zoom,.08,2.5);
   state.camera.x=state.map.width/2;
   state.camera.y=state.map.height/2;
   updateZoomLabel();
+  if(state.view==='iso')say('Full-city 2.5D overview. Switch views or zoom in to return to neighborhood scale.');
 }
 
 function clampCamera(){
@@ -1290,7 +1345,7 @@ function restoreAuthored(){
   state.selected=null;
   state.player.x=state.map.playerSpawn.x;state.player.y=state.map.playerSpawn.y;
   state.camera.x=state.map.width/2;state.camera.y=state.map.height/2;
-  saveDraft();syncMapInputs();refreshInspector();refreshStats();fitMap();
+  saveDraft();syncMapInputs();refreshInspector();refreshStats();focusCurrentView(true);
   say('Authored Downtown Proof restored.');
 }
 
@@ -1303,7 +1358,7 @@ function clearMap(){
   };
   state.selected=null;
   state.player.x=1536;state.player.y=1536;
-  saveDraft();syncMapInputs();refreshInspector();fitMap();say('Map cleared.');
+  saveDraft();syncMapInputs();refreshInspector();focusCurrentView(true);say('Map cleared.');
 }
 
 function togglePreview(){
@@ -1317,9 +1372,16 @@ function togglePreview(){
   if(state.preview){
     state.player.x=state.map.playerSpawn?.x??state.map.width/2;
     state.player.y=state.map.playerSpawn?.y??state.map.height/2;
-    state.selected=null;refreshInspector();say('Walk test: use WASD/arrows or the mobile pad.');
+    state.selected=null;
+    refreshInspector();
+    focusIsoReview(state.player,true);
+    updatePreviewHud();
+    say('Walk test: closer 2.5D camera enabled. Use WASD/arrows or the mobile pad.');
   }else{
-    state.keys.clear();state.moveButtons.clear();say('Back in review mode.');
+    state.keys.clear();
+    state.moveButtons.clear();
+    ensureIsoReviewZoom(true);
+    say('Back in 2.5D neighborhood review mode.');
   }
   updateModeLabel();
 }
@@ -1337,10 +1399,14 @@ function updatePreview(dt){
     tryMovePlayer(dx*distance,dy*distance);
   }
 
+  updatePreviewHud();
+  followPlayerCamera();
+}
+
+function updatePreviewHud(){
   $('#preview-position').textContent=`X ${Math.round(state.player.x)} · Y ${Math.round(state.player.y)}`;
   const near=nearestInteraction(state.player.x,state.player.y,78);
   $('#nearby-interaction').textContent=near?`Nearby: ${near.label||near.kind}`:'Walk near an interaction marker.';
-  followPlayerCamera();
 }
 
 function tryMovePlayer(dx,dy){
@@ -1383,7 +1449,7 @@ function importMap(raw,source='JSON'){
   state.selected=null;
   state.player.x=map.playerSpawn.x;state.player.y=map.playerSpawn.y;
   state.camera.x=map.width/2;state.camera.y=map.height/2;
-  syncMapInputs();refreshInspector();refreshStats();saveDraft();fitMap();
+  syncMapInputs();refreshInspector();refreshStats();saveDraft();focusCurrentView(true);
   say(`Loaded ${map.name} from ${source}.`);
 }
 
