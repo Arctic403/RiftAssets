@@ -1,148 +1,119 @@
-import { BUILDING_STYLES, PROP_STYLES, INTERACTION_STYLES } from './world-kit.js';
-
-export const MAP_LAYERS = Object.freeze([
-  {id:'roads',label:'Roads',color:'#3b4148'},
-  {id:'lots',label:'Lots',color:'#5c5a50'},
-  {id:'buildings',label:'Buildings',color:'#9b7656'},
-  {id:'props',label:'Props',color:'#55745d'},
-  {id:'zones',label:'Zones',color:'#6b5a8b'},
+export const MAP_LAYERS=[
+  {id:'lots',label:'Lots / Ground',color:'#6f745d'},
+  {id:'roads',label:'Roads',color:'#4b5054'},
+  {id:'buildings',label:'Buildings',color:'#a87345'},
+  {id:'props',label:'Props',color:'#55745b'},
+  {id:'zones',label:'Zones',color:'#695a88'},
   {id:'interactions',label:'Interactions',color:'#d78e36'}
-]);
+];
 
-export const PALETTES = Object.freeze({
+export const PALETTES={
   building:[
-    {id:'apartment',label:'Apartment',color:'#856f63',width:180,height:126,floors:4,style:'brick-warm',assetId:'building.apartment.a',collision:true},
-    {id:'corner-store',label:'Corner Store',color:'#8b6a4e',width:160,height:110,floors:2,style:'brick-warm',assetId:'building.store.corner.a',collision:true},
-    {id:'office',label:'Office',color:'#646f79',width:200,height:140,floors:6,style:'glass-office',assetId:'building.office.a',collision:true},
-    {id:'warehouse',label:'Warehouse',color:'#687069',width:230,height:150,floors:2,style:'industrial',assetId:'building.warehouse.a',collision:true},
-    {id:'house',label:'House',color:'#8c765d',width:118,height:88,floors:2,style:'brick-warm',assetId:'building.house.a',collision:true},
-    {id:'bank',label:'Bank',color:'#6a7078',width:190,height:126,floors:4,style:'civic',assetId:'building.bank.a',collision:true},
-    {id:'casino',label:'Casino',color:'#7d5f7c',width:240,height:160,floors:5,style:'casino-neon',assetId:'building.casino.a',collision:true},
-    {id:'nightclub',label:'Nightclub',color:'#6f586f',width:180,height:118,floors:2,style:'night-neon',assetId:'building.nightclub.a',collision:true},
-    {id:'gym',label:'Gym',color:'#657369',width:190,height:125,floors:3,style:'concrete',assetId:'building.gym.a',collision:true},
-    {id:'hospital',label:'Hospital',color:'#788584',width:250,height:170,floors:6,style:'medical',assetId:'building.hospital.a',collision:true}
+    {id:'apartment',label:'Apartment',style:'brick-warm',floors:4,assetId:'building.apartment.a',color:'#8f654f',collision:true},
+    {id:'office',label:'Office',style:'glass-blue',floors:7,assetId:'building.office.a',color:'#55717d',collision:true},
+    {id:'corner-store',label:'Corner Store',style:'storefront',floors:2,assetId:'building.corner-store.a',color:'#8c765f',collision:true},
+    {id:'warehouse',label:'Warehouse',style:'industrial',floors:2,assetId:'building.warehouse.a',color:'#707477',collision:true}
   ],
-  prop:Object.entries(PROP_STYLES).map(([id,value])=>({id,...value})),
+  prop:[
+    {id:'tree',label:'Tree',color:'#55745b',radius:14,collision:true},
+    {id:'streetlight',label:'Street Light',color:'#879199',radius:7,collision:false},
+    {id:'parked-car',label:'Parked Car',color:'#687785',radius:14,collision:true},
+    {id:'bench',label:'Bench',color:'#7e634d',radius:10,collision:true},
+    {id:'dumpster',label:'Dumpster',color:'#466052',radius:11,collision:true},
+    {id:'bus-stop',label:'Bus Stop',color:'#536e7c',radius:10,collision:false}
+  ],
   zone:[
-    {id:'lot',label:'Buildable Lot',color:'#65624f',layer:'lots'},
-    {id:'district',label:'District',color:'#695a88',layer:'zones'},
-    {id:'crime-zone',label:'Crime Zone',color:'#80504f',layer:'zones'},
-    {id:'safe-zone',label:'Safe Zone',color:'#4d6f62',layer:'zones'},
-    {id:'spawn-zone',label:'Spawn Zone',color:'#5b6e87',layer:'zones'}
+    {id:'lot',label:'Development Lot',layer:'lots',color:'#7d735f'},
+    {id:'plaza',label:'Public Plaza',layer:'lots',color:'#8a806e'},
+    {id:'park',label:'Pocket Park',layer:'lots',color:'#4f6f59'},
+    {id:'service-yard',label:'Service Yard',layer:'lots',color:'#66645e'}
   ],
-  interaction:Object.entries(INTERACTION_STYLES).map(([id,value])=>({id,...value}))
+  interaction:[
+    {id:'door',label:'Entrance',color:'#d78e36',radius:10},
+    {id:'crime',label:'Crime Opportunity',color:'#c45d5d',radius:10},
+    {id:'travel',label:'Travel Point',color:'#72a0bb',radius:10}
+  ]
+};
+
+const road=(id,label,x1,y1,x2,y2,width=96,style='local')=>({
+  id,type:'road',kind:'road',style,layer:'roads',x1,y1,x2,y2,width,label,
+  color:style==='alley'?'#303438':style==='avenue'?'#383e43':'#353b41',collision:false
 });
 
-const B=(id,kind,x,y,width,height,floors,style,label,rotation=0)=>({
-  id,type:'building',kind,layer:'buildings',x,y,width,height,rotation,floors,style,
-  assetId:`building.${kind}.${style}`,label,color:BUILDING_STYLES[style]?.faceX||'#777777',collision:true
-});
-const P=(id,kind,x,y,rotation=0,label)=>({
-  id,type:'prop',kind,layer:'props',x,y,rotation,radius:PROP_STYLES[kind]?.radius||12,
-  label:label||PROP_STYLES[kind]?.label||kind,color:PROP_STYLES[kind]?.color||'#777777',
-  collision:!!PROP_STYLES[kind]?.collision
-});
-const I=(id,kind,x,y,label)=>({
-  id,type:'interaction',kind,layer:'interactions',x,y,radius:INTERACTION_STYLES[kind]?.radius||12,
-  label:label||INTERACTION_STYLES[kind]?.label||kind,color:INTERACTION_STYLES[kind]?.color||'#d78e36',collision:false
-});
-const Z=(id,kind,layer,x,y,width,height,label,color)=>({
-  id,type:'zone',kind,layer,x,y,width,height,rotation:0,label,color,collision:false
-});
-const R=(id,x1,y1,x2,y2,width,label,style='avenue')=>({
-  id,type:'road',kind:'road',style,layer:'roads',x1,y1,x2,y2,width,label,color:style==='alley'?'#30353a':'#353b41',collision:false
+const lot=(id,label,x,y,width,height,kind='lot',color='#7d735f')=>({
+  id,type:'zone',kind,layer:'lots',x,y,width,height,rotation:0,label,color,collision:false
 });
 
 export function createStarterMap(){
-  const roads=[
-    R('road-king',280,1024,2792,1024,132,'King Avenue','avenue'),
-    R('road-rift',1536,280,1536,2792,140,'Rift Boulevard','boulevard'),
-    R('road-market',280,1792,2792,1792,106,'Market Street','local'),
-    R('road-harbour',280,2432,2792,2432,110,'Harbour Road','local'),
-    R('road-ash',896,280,896,2792,94,'Ash Street','local'),
-    R('road-vale',2176,280,2176,2792,94,'Vale Street','local'),
-    R('alley-nw',1060,1280,1390,1280,44,'Service Alley','alley'),
-    R('alley-se',1690,2070,2050,2070,42,'Neon Alley','alley')
-  ];
-
-  const lots=[
-    Z('lot-nw','lot','lots',1160,690,470,480,'Northwest Block','#65624f'),
-    Z('lot-ne','lot','lots',1855,690,500,480,'Northeast Block','#66645a'),
-    Z('lot-wc','lot','lots',1160,1400,470,560,'Market West','#666257'),
-    Z('lot-ec','lot','lots',1855,1400,500,560,'Market East','#62635c'),
-    Z('lot-sw','lot','lots',1160,2110,470,470,'Harbour West','#5d6058'),
-    Z('lot-se','lot','lots',1855,2110,500,470,'Neon Quarter','#615864'),
-    Z('lot-far-east','lot','lots',2540,1420,430,550,'Civic East','#626661')
-  ];
-
-  const zones=[
-    ...lots,
-    Z('zone-downtown','district','zones',1536,1510,2500,2500,'Downtown','#695a88'),
-    Z('zone-market-safe','safe-zone','zones',1855,1400,420,420,'Market Plaza Safe Zone','#4d6f62'),
-    Z('zone-neon-crime','crime-zone','zones',1860,2180,420,360,'Neon Alley Crime Zone','#80504f')
-  ];
-
-  const buildings=[
-    B('apt-copper','apartment',1060,640,210,150,5,'brick-warm','Copper Row Apartments'),
-    B('apt-ash','apartment',1285,705,178,132,4,'brick-dark','Ash Court'),
-    B('store-lucky','corner-store',1130,905,188,112,2,'brick-warm','Lucky Mart'),
-    B('office-rift','office',1765,610,220,150,7,'glass-office','Rift Exchange'),
-    B('bank-central','bank',2000,760,220,145,5,'civic','RiftCity Central Bank'),
-    B('office-vale','office',1850,920,190,128,5,'concrete','Vale Offices'),
-    B('apt-market','apartment',1050,1430,205,145,5,'brick-dark','Market Lofts'),
-    B('gym-core','gym',1295,1510,190,132,3,'concrete','Core Gym'),
-    B('store-market','corner-store',1110,1680,182,105,2,'brick-warm','Market Pharmacy'),
-    B('office-market','office',1760,1340,205,145,6,'glass-office','Mercer Tower'),
-    B('store-cafe','corner-store',2005,1435,178,105,2,'brick-warm','Rift Café'),
-    B('apt-plaza','apartment',1885,1650,220,140,6,'concrete','Plaza Residences'),
-    B('warehouse-harbour','warehouse',1065,2095,250,165,2,'industrial','Harbour Freight'),
-    B('apt-harbour','apartment',1325,2180,190,135,4,'brick-warm','Dockside Flats'),
-    B('casino-ember','casino',1740,2035,260,175,5,'casino-neon','Ember Casino'),
-    B('club-void','nightclub',2035,2225,195,122,2,'night-neon','VOID Nightclub'),
-    B('hospital-east','hospital',2530,1325,270,180,6,'medical','RiftCity Medical'),
-    B('office-civic','office',2520,1635,220,150,5,'civic','Civic Services')
-  ];
-
-  const props=[
-    P('tree-01','tree',1470,890),P('tree-02','tree',1600,900),P('tree-03','tree',1470,1150),P('tree-04','tree',1605,1140),
-    P('tree-05','tree',1685,1515),P('tree-06','tree',2030,1510),P('tree-07','tree',1685,1605),P('tree-08','tree',2035,1600),
-    P('bench-01','bench',1735,1515),P('bench-02','bench',1975,1600),
-    P('light-01','streetlight',1435,990),P('light-02','streetlight',1635,990),P('light-03','streetlight',1435,1055),P('light-04','streetlight',1635,1055),
-    P('light-05','streetlight',850,1680),P('light-06','streetlight',940,1680),P('light-07','streetlight',2135,1680),P('light-08','streetlight',2215,1680),
-    P('light-09','streetlight',850,1900),P('light-10','streetlight',940,1900),P('light-11','streetlight',2135,1900),P('light-12','streetlight',2215,1900),
-    P('car-01','parked-car',1350,1085,90,'Parked Sedan'),P('car-02','parked-car',1740,960,0,'Parked Sedan'),
-    P('car-03','parked-car',2070,1840,90,'Parked Coupe'),P('car-04','parked-car',1005,1850,90,'Parked Van'),
-    P('bus-01','bus-stop',1490,930,0,'King Ave Bus Stop'),P('bus-02','bus-stop',1585,1880,0,'Market Bus Stop'),
-    P('dump-01','dumpster',1390,1270),P('dump-02','dumpster',2040,2070),
-    P('hydrant-01','hydrant',1440,1075),P('hydrant-02','hydrant',2230,1735),
-    P('planter-01','planter',1810,1515),P('planter-02','planter',1900,1600)
-  ];
-
-  const interactions=[
-    I('int-lucky','shop',1128,840,'Enter Lucky Mart'),
-    I('int-bank','bank',1920,825,'Open Central Bank'),
-    I('int-gym','gym',1260,1435,'Enter Core Gym'),
-    I('int-pharmacy','shop',1090,1625,'Enter Market Pharmacy'),
-    I('int-cafe','shop',1980,1380,'Enter Rift Café'),
-    I('int-casino','casino',1660,2120,'Enter Ember Casino'),
-    I('int-club','nightclub',1970,2160,'Enter VOID Nightclub'),
-    I('int-hospital','hospital',2440,1415,'Enter RiftCity Medical'),
-    I('int-crime','crime',1880,2070,'Neon Alley Opportunity')
-  ];
-
   return {
     format:'riftcity-2d-map',
     version:2,
-    name:'RiftCity — Downtown Proof District',
-    revision:'phase-4-authored-downtown',
-    width:3072,
-    height:3072,
+    name:'RiftCity — Downtown Ground Plan',
+    revision:'downtown-ground-v1',
+    width:3584,
+    height:3328,
     gridSize:32,
-    playerSpawn:{x:1490,y:1160},
-    roads,
-    buildings,
-    props,
-    zones,
-    interactions
+    playerSpawn:{x:1792,y:1664},
+
+    // Street hierarchy first: two major avenues, secondary streets,
+    // then service alleys. The plan intentionally avoids a uniform city grid.
+    roads:[
+      road('road-west-ave','West Avenue',736,160,736,3168,144,'avenue'),
+      road('road-central-ave','Central Avenue',1792,96,1792,3232,160,'avenue'),
+      road('road-east-ave','East Avenue',2880,224,2880,3104,128,'avenue'),
+
+      road('road-north','North Street',160,608,3424,608,120,'local'),
+      road('road-market','Market Street',96,1472,3488,1472,144,'avenue'),
+      road('road-civic','Civic Street',224,2272,3360,2272,112,'local'),
+      road('road-south','South Street',352,2944,3232,2944,104,'local'),
+
+      road('road-old-quarter','Old Quarter Road',736,608,1184,1040,88,'local'),
+      road('road-river-link','Foundry Link',2368,2272,2880,2688,88,'local'),
+
+      road('alley-nw','Northwest Service Alley',1056,608,1056,1472,48,'alley'),
+      road('alley-nc','Arcade Alley',1408,1056,1792,1056,48,'alley'),
+      road('alley-ne','Mercer Alley',2336,608,2336,1472,48,'alley'),
+      road('alley-west','West Market Alley',736,1856,1792,1856,48,'alley'),
+      road('alley-east','East Market Alley',1792,1856,2880,1856,48,'alley'),
+      road('alley-sw','Foundry Alley',1184,2272,1184,2944,48,'alley'),
+      road('alley-se','Warehouse Alley',2464,2272,2464,2944,48,'alley')
+    ],
+
+    // Ground parcels only. These create believable block shapes and reserve
+    // future landmark/filler-building footprints without placing buildings yet.
+    zones:[
+      lot('lot-nw-1','Northwest Block A',224,224,416,272),
+      lot('lot-nw-2','Northwest Block B',896,224,768,272),
+      lot('lot-n-1','North Core Block',1920,224,816,272),
+      lot('lot-ne-1','Northeast Block',3040,288,320,208),
+
+      lot('lot-old-1','Old Quarter West',224,768,400,544),
+      lot('lot-old-2','Old Quarter Inner',864,800,256,448),
+      lot('lot-old-3','Old Quarter East',1248,736,400,608),
+      lot('lot-core-n','Central North Block',1936,768,656,544),
+      lot('lot-east-n','East North Block',2672,768,256,544),
+      lot('lot-edge-ne','East Edge North',3104,768,256,544),
+
+      lot('plaza-market','Market Square',1248,1600,384,192,'plaza','#8b8170'),
+      lot('lot-market-west','Market West Block',224,1632,400,480),
+      lot('lot-market-mid','Market Mid Block',864,1984,800,160),
+      lot('lot-market-east','Market East Block',1936,1984,800,160),
+      lot('park-civic','Civic Green',3040,1664,320,416,'park','#4f6f59'),
+
+      lot('lot-civic-west','Civic West Block',224,2432,400,352),
+      lot('lot-civic-mid','Civic Mid Block',864,2432,256,352),
+      lot('lot-foundry','Foundry Block',1312,2432,352,352,'service-yard','#66645e'),
+      lot('lot-south-core','South Core Block',1936,2432,384,352),
+      lot('lot-warehouse','Warehouse Block',2608,2496,128,288,'service-yard','#66645e'),
+      lot('lot-east-south','East South Block',3040,2432,320,352),
+
+      lot('lot-bottom-west','Southwest Edge',480,3072,1024,128),
+      lot('lot-bottom-core','South Core Edge',1984,3072,704,128),
+      lot('lot-bottom-east','Southeast Edge',3008,3072,224,128)
+    ],
+
+    buildings:[],
+    props:[],
+    interactions:[]
   };
 }

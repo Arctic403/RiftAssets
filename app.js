@@ -586,10 +586,34 @@ function drawPlanZones(layer){
 
 function drawPlanRoad(o){
   const a=worldToScreen(o.x1,o.y1),b=worldToScreen(o.x2,o.y2);
-  ctx.save();ctx.lineCap='round';
-  ctx.strokeStyle=state.night?'#373b3e':'#5d5f5e';ctx.lineWidth=(o.width+22)*state.camera.zoom;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
-  ctx.strokeStyle=o.color||'#353b41';ctx.lineWidth=o.width*state.camera.zoom;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
-  ctx.setLineDash([18*state.camera.zoom,15*state.camera.zoom]);ctx.strokeStyle='rgba(230,220,180,.5)';ctx.lineWidth=Math.max(1,2*state.camera.zoom);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
+  const z=state.camera.zoom;
+  const alley=o.style==='alley';
+  const avenue=o.style==='avenue';
+  const curb=alley?8:avenue?28:20;
+
+  ctx.save();
+  ctx.lineCap=alley?'butt':'round';
+
+  // Sidewalk / curb band. Alleys get only a narrow service edge.
+  ctx.strokeStyle=state.night?'#373b3e':'#666966';
+  ctx.lineWidth=(o.width+curb)*z;
+  ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
+
+  ctx.strokeStyle=o.color||'#353b41';
+  ctx.lineWidth=o.width*z;
+  ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
+
+  if(!alley){
+    ctx.setLineDash([(avenue?24:18)*z,(avenue?18:15)*z]);
+    ctx.strokeStyle=avenue?'rgba(235,202,112,.72)':'rgba(230,220,180,.5)';
+    ctx.lineWidth=Math.max(1,(avenue?2.5:2)*z);
+    ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
+  }else if(z>.35){
+    ctx.setLineDash([6*z,8*z]);
+    ctx.strokeStyle='rgba(190,190,180,.22)';
+    ctx.lineWidth=Math.max(1,z);
+    ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
+  }
   ctx.restore();
 }
 
@@ -1020,7 +1044,7 @@ function restoreAuthored(){
   state.player.x=state.map.playerSpawn.x;state.player.y=state.map.playerSpawn.y;
   state.camera.x=state.map.width/2;state.camera.y=state.map.height/2;
   saveDraft();syncMapInputs();refreshInspector();refreshStats();fitMap();
-  say('Authored Downtown Proof restored.');
+  say('Clean Downtown ground plan restored.');
 }
 
 function clearMap(){
