@@ -223,5 +223,3977 @@ const assets=[
   }
 ];
 
-export const ASSET_LIBRARY=Object.freeze(assets);
-export const ASSET_BY_ID=Object.freeze(Object.fromEntries(assets.map(asset=>[asset.id,asset])));
+const REBUILT_APARTMENT = {
+  "id": "apartment-03f-01",
+  "name": "3-Storey Apartment — Rebuilt",
+  "category": "Buildings",
+  "description": "Rebuilt low-poly urban apartment with framed inset windows, real balcony rails and supports, recessed entry, roof equipment, side windows, facade trim and a detailed fire escape.",
+  "cameraRadius": 24,
+  "parts": [
+    {
+      "id": "shell",
+      "name": "Apartment masonry shell",
+      "shape": "box",
+      "color": "#625a52",
+      "position": [
+        0,
+        5.15,
+        0
+      ],
+      "size": [
+        12.2,
+        10.3,
+        8.8
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.92,
+      "hidden": false
+    },
+    {
+      "id": "ground-base",
+      "name": "Dark ground-floor base",
+      "shape": "box",
+      "color": "#383d42",
+      "position": [
+        0,
+        1.15,
+        4.44
+      ],
+      "size": [
+        12.35,
+        2.3,
+        0.32
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.88,
+      "hidden": false
+    },
+    {
+      "id": "roof-cap",
+      "name": "Roof cap",
+      "shape": "box",
+      "color": "#454a4e",
+      "position": [
+        0,
+        10.48,
+        0
+      ],
+      "size": [
+        12.65,
+        0.38,
+        9.25
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.9,
+      "hidden": false
+    },
+    {
+      "id": "parapet-front",
+      "name": "Front parapet",
+      "shape": "box",
+      "color": "#4d4742",
+      "position": [
+        0,
+        10.95,
+        4.32
+      ],
+      "size": [
+        12.5,
+        0.72,
+        0.35
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.95,
+      "hidden": false
+    },
+    {
+      "id": "parapet-back",
+      "name": "Rear parapet",
+      "shape": "box",
+      "color": "#4d4742",
+      "position": [
+        0,
+        10.95,
+        -4.32
+      ],
+      "size": [
+        12.5,
+        0.72,
+        0.35
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.95,
+      "hidden": false
+    },
+    {
+      "id": "parapet-left",
+      "name": "Left parapet",
+      "shape": "box",
+      "color": "#4d4742",
+      "position": [
+        -6.08,
+        10.95,
+        0
+      ],
+      "size": [
+        0.35,
+        0.72,
+        8.4
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.95,
+      "hidden": false
+    },
+    {
+      "id": "parapet-right",
+      "name": "Right parapet",
+      "shape": "box",
+      "color": "#4d4742",
+      "position": [
+        6.08,
+        10.95,
+        0
+      ],
+      "size": [
+        0.35,
+        0.72,
+        8.4
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.95,
+      "hidden": false
+    },
+    {
+      "id": "facade-column-m4_15",
+      "name": "Facade column",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        -4.15,
+        6.45,
+        4.56
+      ],
+      "size": [
+        0.28,
+        7.55,
+        0.3
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.86,
+      "hidden": false
+    },
+    {
+      "id": "facade-column-0",
+      "name": "Facade column",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        0,
+        6.45,
+        4.56
+      ],
+      "size": [
+        0.28,
+        7.55,
+        0.3
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.86,
+      "hidden": false
+    },
+    {
+      "id": "facade-column-4_15",
+      "name": "Facade column",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        4.15,
+        6.45,
+        4.56
+      ],
+      "size": [
+        0.28,
+        7.55,
+        0.3
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.86,
+      "hidden": false
+    },
+    {
+      "id": "facade-band-0",
+      "name": "Facade trim band",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        0,
+        2.75,
+        4.57
+      ],
+      "size": [
+        12.2,
+        0.18,
+        0.28
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.86,
+      "hidden": false
+    },
+    {
+      "id": "facade-band-1",
+      "name": "Facade trim band",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        0,
+        5.15,
+        4.57
+      ],
+      "size": [
+        12.2,
+        0.18,
+        0.28
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.86,
+      "hidden": false
+    },
+    {
+      "id": "facade-band-2",
+      "name": "Facade trim band",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        0,
+        7.55,
+        4.57
+      ],
+      "size": [
+        12.2,
+        0.18,
+        0.28
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.86,
+      "hidden": false
+    },
+    {
+      "id": "facade-band-3",
+      "name": "Facade trim band",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        0,
+        9.82,
+        4.57
+      ],
+      "size": [
+        12.2,
+        0.18,
+        0.28
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.86,
+      "hidden": false
+    },
+    {
+      "id": "entry-recess",
+      "name": "Recessed entry",
+      "shape": "box",
+      "color": "#1f3540",
+      "position": [
+        0,
+        1.68,
+        4.5
+      ],
+      "size": [
+        2.65,
+        3.25,
+        0.22
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.18,
+      "roughness": 0.28,
+      "hidden": false
+    },
+    {
+      "id": "entry-frame-top",
+      "name": "Entry frame top",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        0,
+        3.42,
+        4.72
+      ],
+      "size": [
+        3.25,
+        0.28,
+        0.32
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.82,
+      "hidden": false
+    },
+    {
+      "id": "entry-frame-left",
+      "name": "Entry frame left",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        -1.48,
+        1.82,
+        4.72
+      ],
+      "size": [
+        0.28,
+        3.5,
+        0.32
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.82,
+      "hidden": false
+    },
+    {
+      "id": "entry-frame-right",
+      "name": "Entry frame right",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        1.48,
+        1.82,
+        4.72
+      ],
+      "size": [
+        0.28,
+        3.5,
+        0.32
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.82,
+      "hidden": false
+    },
+    {
+      "id": "entry-door-left",
+      "name": "Glass entry door",
+      "shape": "box",
+      "color": "#28495a",
+      "position": [
+        -0.62,
+        1.55,
+        4.69
+      ],
+      "size": [
+        1.08,
+        2.85,
+        0.12
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.22,
+      "roughness": 0.18,
+      "hidden": false
+    },
+    {
+      "id": "entry-door-right",
+      "name": "Glass entry door",
+      "shape": "box",
+      "color": "#28495a",
+      "position": [
+        0.62,
+        1.55,
+        4.69
+      ],
+      "size": [
+        1.08,
+        2.85,
+        0.12
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.22,
+      "roughness": 0.18,
+      "hidden": false
+    },
+    {
+      "id": "entry-canopy",
+      "name": "Entry canopy",
+      "shape": "box",
+      "color": "#b6783a",
+      "position": [
+        0,
+        3.7,
+        5.05
+      ],
+      "size": [
+        4.0,
+        0.25,
+        1.2
+      ],
+      "rotation": [
+        -5,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.62,
+      "hidden": false
+    },
+    {
+      "id": "window-0-0-recess",
+      "name": "Window recess",
+      "shape": "box",
+      "color": "#1f3540",
+      "position": [
+        -4.15,
+        3.55,
+        4.49
+      ],
+      "size": [
+        1.55,
+        1.22,
+        0.18
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.12,
+      "roughness": 0.34,
+      "hidden": false
+    },
+    {
+      "id": "window-0-0-frame-top",
+      "name": "Window frame",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        -4.15,
+        4.24,
+        4.66
+      ],
+      "size": [
+        1.82,
+        0.16,
+        0.2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.78,
+      "hidden": false
+    },
+    {
+      "id": "window-0-0-frame-bottom",
+      "name": "Window sill",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        -4.15,
+        2.86,
+        4.7
+      ],
+      "size": [
+        1.9,
+        0.17,
+        0.34
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.8,
+      "hidden": false
+    },
+    {
+      "id": "window-0-0-frame-left",
+      "name": "Window frame",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        -4.97,
+        3.55,
+        4.66
+      ],
+      "size": [
+        0.16,
+        1.25,
+        0.2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.78,
+      "hidden": false
+    },
+    {
+      "id": "window-0-0-frame-right",
+      "name": "Window frame",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        -3.33,
+        3.55,
+        4.66
+      ],
+      "size": [
+        0.16,
+        1.25,
+        0.2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.78,
+      "hidden": false
+    },
+    {
+      "id": "window-0-0-glass",
+      "name": "Window glass",
+      "shape": "box",
+      "color": "#28495a",
+      "position": [
+        -4.15,
+        3.55,
+        4.69
+      ],
+      "size": [
+        1.38,
+        1.06,
+        0.08
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.22,
+      "roughness": 0.18,
+      "hidden": false
+    },
+    {
+      "id": "window-0-1-recess",
+      "name": "Window recess",
+      "shape": "box",
+      "color": "#1f3540",
+      "position": [
+        -2.05,
+        3.55,
+        4.49
+      ],
+      "size": [
+        1.55,
+        1.22,
+        0.18
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.12,
+      "roughness": 0.34,
+      "hidden": false
+    },
+    {
+      "id": "window-0-1-frame-top",
+      "name": "Window frame",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        -2.05,
+        4.24,
+        4.66
+      ],
+      "size": [
+        1.82,
+        0.16,
+        0.2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.78,
+      "hidden": false
+    },
+    {
+      "id": "window-0-1-frame-bottom",
+      "name": "Window sill",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        -2.05,
+        2.86,
+        4.7
+      ],
+      "size": [
+        1.9,
+        0.17,
+        0.34
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.8,
+      "hidden": false
+    },
+    {
+      "id": "window-0-1-frame-left",
+      "name": "Window frame",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        -2.87,
+        3.55,
+        4.66
+      ],
+      "size": [
+        0.16,
+        1.25,
+        0.2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.78,
+      "hidden": false
+    },
+    {
+      "id": "window-0-1-frame-right",
+      "name": "Window frame",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        -1.23,
+        3.55,
+        4.66
+      ],
+      "size": [
+        0.16,
+        1.25,
+        0.2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.78,
+      "hidden": false
+    },
+    {
+      "id": "window-0-1-glass",
+      "name": "Window glass",
+      "shape": "box",
+      "color": "#28495a",
+      "position": [
+        -2.05,
+        3.55,
+        4.69
+      ],
+      "size": [
+        1.38,
+        1.06,
+        0.08
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.22,
+      "roughness": 0.18,
+      "hidden": false
+    },
+    {
+      "id": "window-0-2-recess",
+      "name": "Window recess",
+      "shape": "box",
+      "color": "#1f3540",
+      "position": [
+        2.05,
+        3.55,
+        4.49
+      ],
+      "size": [
+        1.55,
+        1.22,
+        0.18
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.12,
+      "roughness": 0.34,
+      "hidden": false
+    },
+    {
+      "id": "window-0-2-frame-top",
+      "name": "Window frame",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        2.05,
+        4.24,
+        4.66
+      ],
+      "size": [
+        1.82,
+        0.16,
+        0.2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.78,
+      "hidden": false
+    },
+    {
+      "id": "window-0-2-frame-bottom",
+      "name": "Window sill",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        2.05,
+        2.86,
+        4.7
+      ],
+      "size": [
+        1.9,
+        0.17,
+        0.34
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.8,
+      "hidden": false
+    },
+    {
+      "id": "window-0-2-frame-left",
+      "name": "Window frame",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        1.23,
+        3.55,
+        4.66
+      ],
+      "size": [
+        0.16,
+        1.25,
+        0.2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.78,
+      "hidden": false
+    },
+    {
+      "id": "window-0-2-frame-right",
+      "name": "Window frame",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        2.87,
+        3.55,
+        4.66
+      ],
+      "size": [
+        0.16,
+        1.25,
+        0.2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.78,
+      "hidden": false
+    },
+    {
+      "id": "window-0-2-glass",
+      "name": "Window glass",
+      "shape": "box",
+      "color": "#28495a",
+      "position": [
+        2.05,
+        3.55,
+        4.69
+      ],
+      "size": [
+        1.38,
+        1.06,
+        0.08
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.22,
+      "roughness": 0.18,
+      "hidden": false
+    },
+    {
+      "id": "window-0-3-recess",
+      "name": "Window recess",
+      "shape": "box",
+      "color": "#1f3540",
+      "position": [
+        4.15,
+        3.55,
+        4.49
+      ],
+      "size": [
+        1.55,
+        1.22,
+        0.18
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.12,
+      "roughness": 0.34,
+      "hidden": false
+    },
+    {
+      "id": "window-0-3-frame-top",
+      "name": "Window frame",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        4.15,
+        4.24,
+        4.66
+      ],
+      "size": [
+        1.82,
+        0.16,
+        0.2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.78,
+      "hidden": false
+    },
+    {
+      "id": "window-0-3-frame-bottom",
+      "name": "Window sill",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        4.15,
+        2.86,
+        4.7
+      ],
+      "size": [
+        1.9,
+        0.17,
+        0.34
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.8,
+      "hidden": false
+    },
+    {
+      "id": "window-0-3-frame-left",
+      "name": "Window frame",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        3.33,
+        3.55,
+        4.66
+      ],
+      "size": [
+        0.16,
+        1.25,
+        0.2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.78,
+      "hidden": false
+    },
+    {
+      "id": "window-0-3-frame-right",
+      "name": "Window frame",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        4.97,
+        3.55,
+        4.66
+      ],
+      "size": [
+        0.16,
+        1.25,
+        0.2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.78,
+      "hidden": false
+    },
+    {
+      "id": "window-0-3-glass",
+      "name": "Window glass",
+      "shape": "box",
+      "color": "#28495a",
+      "position": [
+        4.15,
+        3.55,
+        4.69
+      ],
+      "size": [
+        1.38,
+        1.06,
+        0.08
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.22,
+      "roughness": 0.18,
+      "hidden": false
+    },
+    {
+      "id": "window-1-0-recess",
+      "name": "Window recess",
+      "shape": "box",
+      "color": "#1f3540",
+      "position": [
+        -4.15,
+        5.95,
+        4.49
+      ],
+      "size": [
+        1.55,
+        1.22,
+        0.18
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.12,
+      "roughness": 0.34,
+      "hidden": false
+    },
+    {
+      "id": "window-1-0-frame-top",
+      "name": "Window frame",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        -4.15,
+        6.64,
+        4.66
+      ],
+      "size": [
+        1.82,
+        0.16,
+        0.2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.78,
+      "hidden": false
+    },
+    {
+      "id": "window-1-0-frame-bottom",
+      "name": "Window sill",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        -4.15,
+        5.26,
+        4.7
+      ],
+      "size": [
+        1.9,
+        0.17,
+        0.34
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.8,
+      "hidden": false
+    },
+    {
+      "id": "window-1-0-frame-left",
+      "name": "Window frame",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        -4.97,
+        5.95,
+        4.66
+      ],
+      "size": [
+        0.16,
+        1.25,
+        0.2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.78,
+      "hidden": false
+    },
+    {
+      "id": "window-1-0-frame-right",
+      "name": "Window frame",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        -3.33,
+        5.95,
+        4.66
+      ],
+      "size": [
+        0.16,
+        1.25,
+        0.2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.78,
+      "hidden": false
+    },
+    {
+      "id": "window-1-0-glass",
+      "name": "Window glass",
+      "shape": "box",
+      "color": "#28495a",
+      "position": [
+        -4.15,
+        5.95,
+        4.69
+      ],
+      "size": [
+        1.38,
+        1.06,
+        0.08
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.22,
+      "roughness": 0.18,
+      "hidden": false
+    },
+    {
+      "id": "window-1-1-recess",
+      "name": "Window recess",
+      "shape": "box",
+      "color": "#1f3540",
+      "position": [
+        -2.05,
+        5.95,
+        4.49
+      ],
+      "size": [
+        1.55,
+        1.22,
+        0.18
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.12,
+      "roughness": 0.34,
+      "hidden": false
+    },
+    {
+      "id": "window-1-1-frame-top",
+      "name": "Window frame",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        -2.05,
+        6.64,
+        4.66
+      ],
+      "size": [
+        1.82,
+        0.16,
+        0.2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.78,
+      "hidden": false
+    },
+    {
+      "id": "window-1-1-frame-bottom",
+      "name": "Window sill",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        -2.05,
+        5.26,
+        4.7
+      ],
+      "size": [
+        1.9,
+        0.17,
+        0.34
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.8,
+      "hidden": false
+    },
+    {
+      "id": "window-1-1-frame-left",
+      "name": "Window frame",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        -2.87,
+        5.95,
+        4.66
+      ],
+      "size": [
+        0.16,
+        1.25,
+        0.2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.78,
+      "hidden": false
+    },
+    {
+      "id": "window-1-1-frame-right",
+      "name": "Window frame",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        -1.23,
+        5.95,
+        4.66
+      ],
+      "size": [
+        0.16,
+        1.25,
+        0.2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.78,
+      "hidden": false
+    },
+    {
+      "id": "window-1-1-glass",
+      "name": "Window glass",
+      "shape": "box",
+      "color": "#28495a",
+      "position": [
+        -2.05,
+        5.95,
+        4.69
+      ],
+      "size": [
+        1.38,
+        1.06,
+        0.08
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.22,
+      "roughness": 0.18,
+      "hidden": false
+    },
+    {
+      "id": "window-1-2-recess",
+      "name": "Window recess",
+      "shape": "box",
+      "color": "#1f3540",
+      "position": [
+        2.05,
+        5.95,
+        4.49
+      ],
+      "size": [
+        1.55,
+        1.22,
+        0.18
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.12,
+      "roughness": 0.34,
+      "hidden": false
+    },
+    {
+      "id": "window-1-2-frame-top",
+      "name": "Window frame",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        2.05,
+        6.64,
+        4.66
+      ],
+      "size": [
+        1.82,
+        0.16,
+        0.2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.78,
+      "hidden": false
+    },
+    {
+      "id": "window-1-2-frame-bottom",
+      "name": "Window sill",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        2.05,
+        5.26,
+        4.7
+      ],
+      "size": [
+        1.9,
+        0.17,
+        0.34
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.8,
+      "hidden": false
+    },
+    {
+      "id": "window-1-2-frame-left",
+      "name": "Window frame",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        1.23,
+        5.95,
+        4.66
+      ],
+      "size": [
+        0.16,
+        1.25,
+        0.2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.78,
+      "hidden": false
+    },
+    {
+      "id": "window-1-2-frame-right",
+      "name": "Window frame",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        2.87,
+        5.95,
+        4.66
+      ],
+      "size": [
+        0.16,
+        1.25,
+        0.2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.78,
+      "hidden": false
+    },
+    {
+      "id": "window-1-2-glass",
+      "name": "Window glass",
+      "shape": "box",
+      "color": "#28495a",
+      "position": [
+        2.05,
+        5.95,
+        4.69
+      ],
+      "size": [
+        1.38,
+        1.06,
+        0.08
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.22,
+      "roughness": 0.18,
+      "hidden": false
+    },
+    {
+      "id": "window-1-3-recess",
+      "name": "Window recess",
+      "shape": "box",
+      "color": "#1f3540",
+      "position": [
+        4.15,
+        5.95,
+        4.49
+      ],
+      "size": [
+        1.55,
+        1.22,
+        0.18
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.12,
+      "roughness": 0.34,
+      "hidden": false
+    },
+    {
+      "id": "window-1-3-frame-top",
+      "name": "Window frame",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        4.15,
+        6.64,
+        4.66
+      ],
+      "size": [
+        1.82,
+        0.16,
+        0.2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.78,
+      "hidden": false
+    },
+    {
+      "id": "window-1-3-frame-bottom",
+      "name": "Window sill",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        4.15,
+        5.26,
+        4.7
+      ],
+      "size": [
+        1.9,
+        0.17,
+        0.34
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.8,
+      "hidden": false
+    },
+    {
+      "id": "window-1-3-frame-left",
+      "name": "Window frame",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        3.33,
+        5.95,
+        4.66
+      ],
+      "size": [
+        0.16,
+        1.25,
+        0.2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.78,
+      "hidden": false
+    },
+    {
+      "id": "window-1-3-frame-right",
+      "name": "Window frame",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        4.97,
+        5.95,
+        4.66
+      ],
+      "size": [
+        0.16,
+        1.25,
+        0.2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.78,
+      "hidden": false
+    },
+    {
+      "id": "window-1-3-glass",
+      "name": "Window glass",
+      "shape": "box",
+      "color": "#28495a",
+      "position": [
+        4.15,
+        5.95,
+        4.69
+      ],
+      "size": [
+        1.38,
+        1.06,
+        0.08
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.22,
+      "roughness": 0.18,
+      "hidden": false
+    },
+    {
+      "id": "window-2-0-recess",
+      "name": "Window recess",
+      "shape": "box",
+      "color": "#1f3540",
+      "position": [
+        -4.15,
+        8.35,
+        4.49
+      ],
+      "size": [
+        1.55,
+        1.22,
+        0.18
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.12,
+      "roughness": 0.34,
+      "hidden": false
+    },
+    {
+      "id": "window-2-0-frame-top",
+      "name": "Window frame",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        -4.15,
+        9.04,
+        4.66
+      ],
+      "size": [
+        1.82,
+        0.16,
+        0.2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.78,
+      "hidden": false
+    },
+    {
+      "id": "window-2-0-frame-bottom",
+      "name": "Window sill",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        -4.15,
+        7.66,
+        4.7
+      ],
+      "size": [
+        1.9,
+        0.17,
+        0.34
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.8,
+      "hidden": false
+    },
+    {
+      "id": "window-2-0-frame-left",
+      "name": "Window frame",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        -4.97,
+        8.35,
+        4.66
+      ],
+      "size": [
+        0.16,
+        1.25,
+        0.2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.78,
+      "hidden": false
+    },
+    {
+      "id": "window-2-0-frame-right",
+      "name": "Window frame",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        -3.33,
+        8.35,
+        4.66
+      ],
+      "size": [
+        0.16,
+        1.25,
+        0.2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.78,
+      "hidden": false
+    },
+    {
+      "id": "window-2-0-glass",
+      "name": "Window glass",
+      "shape": "box",
+      "color": "#28495a",
+      "position": [
+        -4.15,
+        8.35,
+        4.69
+      ],
+      "size": [
+        1.38,
+        1.06,
+        0.08
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.22,
+      "roughness": 0.18,
+      "hidden": false
+    },
+    {
+      "id": "window-2-1-recess",
+      "name": "Window recess",
+      "shape": "box",
+      "color": "#1f3540",
+      "position": [
+        -2.05,
+        8.35,
+        4.49
+      ],
+      "size": [
+        1.55,
+        1.22,
+        0.18
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.12,
+      "roughness": 0.34,
+      "hidden": false
+    },
+    {
+      "id": "window-2-1-frame-top",
+      "name": "Window frame",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        -2.05,
+        9.04,
+        4.66
+      ],
+      "size": [
+        1.82,
+        0.16,
+        0.2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.78,
+      "hidden": false
+    },
+    {
+      "id": "window-2-1-frame-bottom",
+      "name": "Window sill",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        -2.05,
+        7.66,
+        4.7
+      ],
+      "size": [
+        1.9,
+        0.17,
+        0.34
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.8,
+      "hidden": false
+    },
+    {
+      "id": "window-2-1-frame-left",
+      "name": "Window frame",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        -2.87,
+        8.35,
+        4.66
+      ],
+      "size": [
+        0.16,
+        1.25,
+        0.2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.78,
+      "hidden": false
+    },
+    {
+      "id": "window-2-1-frame-right",
+      "name": "Window frame",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        -1.23,
+        8.35,
+        4.66
+      ],
+      "size": [
+        0.16,
+        1.25,
+        0.2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.78,
+      "hidden": false
+    },
+    {
+      "id": "window-2-1-glass",
+      "name": "Window glass",
+      "shape": "box",
+      "color": "#28495a",
+      "position": [
+        -2.05,
+        8.35,
+        4.69
+      ],
+      "size": [
+        1.38,
+        1.06,
+        0.08
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.22,
+      "roughness": 0.18,
+      "hidden": false
+    },
+    {
+      "id": "window-2-2-recess",
+      "name": "Window recess",
+      "shape": "box",
+      "color": "#1f3540",
+      "position": [
+        2.05,
+        8.35,
+        4.49
+      ],
+      "size": [
+        1.55,
+        1.22,
+        0.18
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.12,
+      "roughness": 0.34,
+      "hidden": false
+    },
+    {
+      "id": "window-2-2-frame-top",
+      "name": "Window frame",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        2.05,
+        9.04,
+        4.66
+      ],
+      "size": [
+        1.82,
+        0.16,
+        0.2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.78,
+      "hidden": false
+    },
+    {
+      "id": "window-2-2-frame-bottom",
+      "name": "Window sill",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        2.05,
+        7.66,
+        4.7
+      ],
+      "size": [
+        1.9,
+        0.17,
+        0.34
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.8,
+      "hidden": false
+    },
+    {
+      "id": "window-2-2-frame-left",
+      "name": "Window frame",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        1.23,
+        8.35,
+        4.66
+      ],
+      "size": [
+        0.16,
+        1.25,
+        0.2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.78,
+      "hidden": false
+    },
+    {
+      "id": "window-2-2-frame-right",
+      "name": "Window frame",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        2.87,
+        8.35,
+        4.66
+      ],
+      "size": [
+        0.16,
+        1.25,
+        0.2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.78,
+      "hidden": false
+    },
+    {
+      "id": "window-2-2-glass",
+      "name": "Window glass",
+      "shape": "box",
+      "color": "#28495a",
+      "position": [
+        2.05,
+        8.35,
+        4.69
+      ],
+      "size": [
+        1.38,
+        1.06,
+        0.08
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.22,
+      "roughness": 0.18,
+      "hidden": false
+    },
+    {
+      "id": "window-2-3-recess",
+      "name": "Window recess",
+      "shape": "box",
+      "color": "#1f3540",
+      "position": [
+        4.15,
+        8.35,
+        4.49
+      ],
+      "size": [
+        1.55,
+        1.22,
+        0.18
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.12,
+      "roughness": 0.34,
+      "hidden": false
+    },
+    {
+      "id": "window-2-3-frame-top",
+      "name": "Window frame",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        4.15,
+        9.04,
+        4.66
+      ],
+      "size": [
+        1.82,
+        0.16,
+        0.2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.78,
+      "hidden": false
+    },
+    {
+      "id": "window-2-3-frame-bottom",
+      "name": "Window sill",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        4.15,
+        7.66,
+        4.7
+      ],
+      "size": [
+        1.9,
+        0.17,
+        0.34
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.8,
+      "hidden": false
+    },
+    {
+      "id": "window-2-3-frame-left",
+      "name": "Window frame",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        3.33,
+        8.35,
+        4.66
+      ],
+      "size": [
+        0.16,
+        1.25,
+        0.2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.78,
+      "hidden": false
+    },
+    {
+      "id": "window-2-3-frame-right",
+      "name": "Window frame",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        4.97,
+        8.35,
+        4.66
+      ],
+      "size": [
+        0.16,
+        1.25,
+        0.2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.78,
+      "hidden": false
+    },
+    {
+      "id": "window-2-3-glass",
+      "name": "Window glass",
+      "shape": "box",
+      "color": "#28495a",
+      "position": [
+        4.15,
+        8.35,
+        4.69
+      ],
+      "size": [
+        1.38,
+        1.06,
+        0.08
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.22,
+      "roughness": 0.18,
+      "hidden": false
+    },
+    {
+      "id": "balcony-1-slab",
+      "name": "Balcony slab",
+      "shape": "box",
+      "color": "#858078",
+      "position": [
+        3.15,
+        4.65,
+        5.1
+      ],
+      "size": [
+        3.4,
+        0.22,
+        1.45
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.82,
+      "hidden": false
+    },
+    {
+      "id": "balcony-1-support-left",
+      "name": "Balcony support",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        1.67,
+        3.9,
+        4.92
+      ],
+      "size": [
+        0.18,
+        1.6,
+        0.25
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.85,
+      "hidden": false
+    },
+    {
+      "id": "balcony-1-support-right",
+      "name": "Balcony support",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        4.63,
+        3.9,
+        4.92
+      ],
+      "size": [
+        0.18,
+        1.6,
+        0.25
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.85,
+      "hidden": false
+    },
+    {
+      "id": "balcony-1-rail-top",
+      "name": "Balcony top rail",
+      "shape": "box",
+      "color": "#2f3438",
+      "position": [
+        3.15,
+        5.38,
+        5.72
+      ],
+      "size": [
+        3.25,
+        0.12,
+        0.12
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.5,
+      "roughness": 0.36,
+      "hidden": false
+    },
+    {
+      "id": "balcony-1-rail-0",
+      "name": "Balcony railing",
+      "shape": "box",
+      "color": "#2f3438",
+      "position": [
+        1.7,
+        5.0,
+        5.72
+      ],
+      "size": [
+        0.09,
+        0.82,
+        0.09
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.52,
+      "roughness": 0.34,
+      "hidden": false
+    },
+    {
+      "id": "balcony-1-rail-1",
+      "name": "Balcony railing",
+      "shape": "box",
+      "color": "#2f3438",
+      "position": [
+        2.43,
+        5.0,
+        5.72
+      ],
+      "size": [
+        0.09,
+        0.82,
+        0.09
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.52,
+      "roughness": 0.34,
+      "hidden": false
+    },
+    {
+      "id": "balcony-1-rail-2",
+      "name": "Balcony railing",
+      "shape": "box",
+      "color": "#2f3438",
+      "position": [
+        3.15,
+        5.0,
+        5.72
+      ],
+      "size": [
+        0.09,
+        0.82,
+        0.09
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.52,
+      "roughness": 0.34,
+      "hidden": false
+    },
+    {
+      "id": "balcony-1-rail-3",
+      "name": "Balcony railing",
+      "shape": "box",
+      "color": "#2f3438",
+      "position": [
+        3.87,
+        5.0,
+        5.72
+      ],
+      "size": [
+        0.09,
+        0.82,
+        0.09
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.52,
+      "roughness": 0.34,
+      "hidden": false
+    },
+    {
+      "id": "balcony-1-rail-4",
+      "name": "Balcony railing",
+      "shape": "box",
+      "color": "#2f3438",
+      "position": [
+        4.6,
+        5.0,
+        5.72
+      ],
+      "size": [
+        0.09,
+        0.82,
+        0.09
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.52,
+      "roughness": 0.34,
+      "hidden": false
+    },
+    {
+      "id": "balcony-1-side-left",
+      "name": "Balcony side rail",
+      "shape": "box",
+      "color": "#2f3438",
+      "position": [
+        1.59,
+        5.0,
+        5.18
+      ],
+      "size": [
+        0.09,
+        0.82,
+        1.02
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.52,
+      "roughness": 0.34,
+      "hidden": false
+    },
+    {
+      "id": "balcony-1-side-right",
+      "name": "Balcony side rail",
+      "shape": "box",
+      "color": "#2f3438",
+      "position": [
+        4.71,
+        5.0,
+        5.18
+      ],
+      "size": [
+        0.09,
+        0.82,
+        1.02
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.52,
+      "roughness": 0.34,
+      "hidden": false
+    },
+    {
+      "id": "balcony-2-slab",
+      "name": "Balcony slab",
+      "shape": "box",
+      "color": "#858078",
+      "position": [
+        3.15,
+        7.05,
+        5.1
+      ],
+      "size": [
+        3.4,
+        0.22,
+        1.45
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.82,
+      "hidden": false
+    },
+    {
+      "id": "balcony-2-support-left",
+      "name": "Balcony support",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        1.67,
+        6.3,
+        4.92
+      ],
+      "size": [
+        0.18,
+        1.6,
+        0.25
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.85,
+      "hidden": false
+    },
+    {
+      "id": "balcony-2-support-right",
+      "name": "Balcony support",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        4.63,
+        6.3,
+        4.92
+      ],
+      "size": [
+        0.18,
+        1.6,
+        0.25
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.85,
+      "hidden": false
+    },
+    {
+      "id": "balcony-2-rail-top",
+      "name": "Balcony top rail",
+      "shape": "box",
+      "color": "#2f3438",
+      "position": [
+        3.15,
+        7.78,
+        5.72
+      ],
+      "size": [
+        3.25,
+        0.12,
+        0.12
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.5,
+      "roughness": 0.36,
+      "hidden": false
+    },
+    {
+      "id": "balcony-2-rail-0",
+      "name": "Balcony railing",
+      "shape": "box",
+      "color": "#2f3438",
+      "position": [
+        1.7,
+        7.4,
+        5.72
+      ],
+      "size": [
+        0.09,
+        0.82,
+        0.09
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.52,
+      "roughness": 0.34,
+      "hidden": false
+    },
+    {
+      "id": "balcony-2-rail-1",
+      "name": "Balcony railing",
+      "shape": "box",
+      "color": "#2f3438",
+      "position": [
+        2.43,
+        7.4,
+        5.72
+      ],
+      "size": [
+        0.09,
+        0.82,
+        0.09
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.52,
+      "roughness": 0.34,
+      "hidden": false
+    },
+    {
+      "id": "balcony-2-rail-2",
+      "name": "Balcony railing",
+      "shape": "box",
+      "color": "#2f3438",
+      "position": [
+        3.15,
+        7.4,
+        5.72
+      ],
+      "size": [
+        0.09,
+        0.82,
+        0.09
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.52,
+      "roughness": 0.34,
+      "hidden": false
+    },
+    {
+      "id": "balcony-2-rail-3",
+      "name": "Balcony railing",
+      "shape": "box",
+      "color": "#2f3438",
+      "position": [
+        3.87,
+        7.4,
+        5.72
+      ],
+      "size": [
+        0.09,
+        0.82,
+        0.09
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.52,
+      "roughness": 0.34,
+      "hidden": false
+    },
+    {
+      "id": "balcony-2-rail-4",
+      "name": "Balcony railing",
+      "shape": "box",
+      "color": "#2f3438",
+      "position": [
+        4.6,
+        7.4,
+        5.72
+      ],
+      "size": [
+        0.09,
+        0.82,
+        0.09
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.52,
+      "roughness": 0.34,
+      "hidden": false
+    },
+    {
+      "id": "balcony-2-side-left",
+      "name": "Balcony side rail",
+      "shape": "box",
+      "color": "#2f3438",
+      "position": [
+        1.59,
+        7.4,
+        5.18
+      ],
+      "size": [
+        0.09,
+        0.82,
+        1.02
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.52,
+      "roughness": 0.34,
+      "hidden": false
+    },
+    {
+      "id": "balcony-2-side-right",
+      "name": "Balcony side rail",
+      "shape": "box",
+      "color": "#2f3438",
+      "position": [
+        4.71,
+        7.4,
+        5.18
+      ],
+      "size": [
+        0.09,
+        0.82,
+        1.02
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.52,
+      "roughness": 0.34,
+      "hidden": false
+    },
+    {
+      "id": "left-window-0-m2_0-recess",
+      "name": "Side window recess",
+      "shape": "box",
+      "color": "#1f3540",
+      "position": [
+        -6.12,
+        3.55,
+        -2.0
+      ],
+      "size": [
+        0.16,
+        1.18,
+        1.45
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.1,
+      "roughness": 0.32,
+      "hidden": false
+    },
+    {
+      "id": "left-window-0-m2_0-glass",
+      "name": "Side window glass",
+      "shape": "box",
+      "color": "#28495a",
+      "position": [
+        -6.18,
+        3.55,
+        -2.0
+      ],
+      "size": [
+        0.08,
+        1.02,
+        1.28
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.22,
+      "roughness": 0.18,
+      "hidden": false
+    },
+    {
+      "id": "left-window-0-1_35-recess",
+      "name": "Side window recess",
+      "shape": "box",
+      "color": "#1f3540",
+      "position": [
+        -6.12,
+        3.55,
+        1.35
+      ],
+      "size": [
+        0.16,
+        1.18,
+        1.45
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.1,
+      "roughness": 0.32,
+      "hidden": false
+    },
+    {
+      "id": "left-window-0-1_35-glass",
+      "name": "Side window glass",
+      "shape": "box",
+      "color": "#28495a",
+      "position": [
+        -6.18,
+        3.55,
+        1.35
+      ],
+      "size": [
+        0.08,
+        1.02,
+        1.28
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.22,
+      "roughness": 0.18,
+      "hidden": false
+    },
+    {
+      "id": "left-window-1-m2_0-recess",
+      "name": "Side window recess",
+      "shape": "box",
+      "color": "#1f3540",
+      "position": [
+        -6.12,
+        5.95,
+        -2.0
+      ],
+      "size": [
+        0.16,
+        1.18,
+        1.45
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.1,
+      "roughness": 0.32,
+      "hidden": false
+    },
+    {
+      "id": "left-window-1-m2_0-glass",
+      "name": "Side window glass",
+      "shape": "box",
+      "color": "#28495a",
+      "position": [
+        -6.18,
+        5.95,
+        -2.0
+      ],
+      "size": [
+        0.08,
+        1.02,
+        1.28
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.22,
+      "roughness": 0.18,
+      "hidden": false
+    },
+    {
+      "id": "left-window-1-1_35-recess",
+      "name": "Side window recess",
+      "shape": "box",
+      "color": "#1f3540",
+      "position": [
+        -6.12,
+        5.95,
+        1.35
+      ],
+      "size": [
+        0.16,
+        1.18,
+        1.45
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.1,
+      "roughness": 0.32,
+      "hidden": false
+    },
+    {
+      "id": "left-window-1-1_35-glass",
+      "name": "Side window glass",
+      "shape": "box",
+      "color": "#28495a",
+      "position": [
+        -6.18,
+        5.95,
+        1.35
+      ],
+      "size": [
+        0.08,
+        1.02,
+        1.28
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.22,
+      "roughness": 0.18,
+      "hidden": false
+    },
+    {
+      "id": "left-window-2-m2_0-recess",
+      "name": "Side window recess",
+      "shape": "box",
+      "color": "#1f3540",
+      "position": [
+        -6.12,
+        8.35,
+        -2.0
+      ],
+      "size": [
+        0.16,
+        1.18,
+        1.45
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.1,
+      "roughness": 0.32,
+      "hidden": false
+    },
+    {
+      "id": "left-window-2-m2_0-glass",
+      "name": "Side window glass",
+      "shape": "box",
+      "color": "#28495a",
+      "position": [
+        -6.18,
+        8.35,
+        -2.0
+      ],
+      "size": [
+        0.08,
+        1.02,
+        1.28
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.22,
+      "roughness": 0.18,
+      "hidden": false
+    },
+    {
+      "id": "left-window-2-1_35-recess",
+      "name": "Side window recess",
+      "shape": "box",
+      "color": "#1f3540",
+      "position": [
+        -6.12,
+        8.35,
+        1.35
+      ],
+      "size": [
+        0.16,
+        1.18,
+        1.45
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.1,
+      "roughness": 0.32,
+      "hidden": false
+    },
+    {
+      "id": "left-window-2-1_35-glass",
+      "name": "Side window glass",
+      "shape": "box",
+      "color": "#28495a",
+      "position": [
+        -6.18,
+        8.35,
+        1.35
+      ],
+      "size": [
+        0.08,
+        1.02,
+        1.28
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.22,
+      "roughness": 0.18,
+      "hidden": false
+    },
+    {
+      "id": "right-window-0-m2_0-recess",
+      "name": "Side window recess",
+      "shape": "box",
+      "color": "#1f3540",
+      "position": [
+        6.12,
+        3.55,
+        -2.0
+      ],
+      "size": [
+        0.16,
+        1.18,
+        1.45
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.1,
+      "roughness": 0.32,
+      "hidden": false
+    },
+    {
+      "id": "right-window-0-m2_0-glass",
+      "name": "Side window glass",
+      "shape": "box",
+      "color": "#28495a",
+      "position": [
+        6.18,
+        3.55,
+        -2.0
+      ],
+      "size": [
+        0.08,
+        1.02,
+        1.28
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.22,
+      "roughness": 0.18,
+      "hidden": false
+    },
+    {
+      "id": "right-window-0-1_35-recess",
+      "name": "Side window recess",
+      "shape": "box",
+      "color": "#1f3540",
+      "position": [
+        6.12,
+        3.55,
+        1.35
+      ],
+      "size": [
+        0.16,
+        1.18,
+        1.45
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.1,
+      "roughness": 0.32,
+      "hidden": false
+    },
+    {
+      "id": "right-window-0-1_35-glass",
+      "name": "Side window glass",
+      "shape": "box",
+      "color": "#28495a",
+      "position": [
+        6.18,
+        3.55,
+        1.35
+      ],
+      "size": [
+        0.08,
+        1.02,
+        1.28
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.22,
+      "roughness": 0.18,
+      "hidden": false
+    },
+    {
+      "id": "right-window-1-m2_0-recess",
+      "name": "Side window recess",
+      "shape": "box",
+      "color": "#1f3540",
+      "position": [
+        6.12,
+        5.95,
+        -2.0
+      ],
+      "size": [
+        0.16,
+        1.18,
+        1.45
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.1,
+      "roughness": 0.32,
+      "hidden": false
+    },
+    {
+      "id": "right-window-1-m2_0-glass",
+      "name": "Side window glass",
+      "shape": "box",
+      "color": "#28495a",
+      "position": [
+        6.18,
+        5.95,
+        -2.0
+      ],
+      "size": [
+        0.08,
+        1.02,
+        1.28
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.22,
+      "roughness": 0.18,
+      "hidden": false
+    },
+    {
+      "id": "right-window-1-1_35-recess",
+      "name": "Side window recess",
+      "shape": "box",
+      "color": "#1f3540",
+      "position": [
+        6.12,
+        5.95,
+        1.35
+      ],
+      "size": [
+        0.16,
+        1.18,
+        1.45
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.1,
+      "roughness": 0.32,
+      "hidden": false
+    },
+    {
+      "id": "right-window-1-1_35-glass",
+      "name": "Side window glass",
+      "shape": "box",
+      "color": "#28495a",
+      "position": [
+        6.18,
+        5.95,
+        1.35
+      ],
+      "size": [
+        0.08,
+        1.02,
+        1.28
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.22,
+      "roughness": 0.18,
+      "hidden": false
+    },
+    {
+      "id": "right-window-2-m2_0-recess",
+      "name": "Side window recess",
+      "shape": "box",
+      "color": "#1f3540",
+      "position": [
+        6.12,
+        8.35,
+        -2.0
+      ],
+      "size": [
+        0.16,
+        1.18,
+        1.45
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.1,
+      "roughness": 0.32,
+      "hidden": false
+    },
+    {
+      "id": "right-window-2-m2_0-glass",
+      "name": "Side window glass",
+      "shape": "box",
+      "color": "#28495a",
+      "position": [
+        6.18,
+        8.35,
+        -2.0
+      ],
+      "size": [
+        0.08,
+        1.02,
+        1.28
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.22,
+      "roughness": 0.18,
+      "hidden": false
+    },
+    {
+      "id": "right-window-2-1_35-recess",
+      "name": "Side window recess",
+      "shape": "box",
+      "color": "#1f3540",
+      "position": [
+        6.12,
+        8.35,
+        1.35
+      ],
+      "size": [
+        0.16,
+        1.18,
+        1.45
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.1,
+      "roughness": 0.32,
+      "hidden": false
+    },
+    {
+      "id": "right-window-2-1_35-glass",
+      "name": "Side window glass",
+      "shape": "box",
+      "color": "#28495a",
+      "position": [
+        6.18,
+        8.35,
+        1.35
+      ],
+      "size": [
+        0.08,
+        1.02,
+        1.28
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.22,
+      "roughness": 0.18,
+      "hidden": false
+    },
+    {
+      "id": "roof-unit-main",
+      "name": "Rooftop HVAC",
+      "shape": "box",
+      "color": "#6c7377",
+      "position": [
+        -2.1,
+        11.6,
+        -1.1
+      ],
+      "size": [
+        3.0,
+        1.0,
+        2.2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.25,
+      "roughness": 0.55,
+      "hidden": false
+    },
+    {
+      "id": "roof-unit-grill",
+      "name": "HVAC grille",
+      "shape": "box",
+      "color": "#2f3438",
+      "position": [
+        -2.1,
+        11.6,
+        0.05
+      ],
+      "size": [
+        2.2,
+        0.55,
+        0.12
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.45,
+      "roughness": 0.4,
+      "hidden": false
+    },
+    {
+      "id": "roof-vent-1",
+      "name": "Roof vent",
+      "shape": "cylinder",
+      "color": "#6c7377",
+      "position": [
+        2.2,
+        11.65,
+        -1.4
+      ],
+      "size": [
+        0.55,
+        1.05,
+        0.55
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.2,
+      "roughness": 0.62,
+      "hidden": false
+    },
+    {
+      "id": "roof-vent-2",
+      "name": "Roof vent",
+      "shape": "cylinder",
+      "color": "#6c7377",
+      "position": [
+        3.2,
+        11.55,
+        -0.55
+      ],
+      "size": [
+        0.45,
+        0.85,
+        0.45
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.2,
+      "roughness": 0.62,
+      "hidden": false
+    },
+    {
+      "id": "fire-platform-0",
+      "name": "Fire escape platform",
+      "shape": "box",
+      "color": "#2f3438",
+      "position": [
+        -6.42,
+        4.65,
+        0.55
+      ],
+      "size": [
+        0.9,
+        0.14,
+        2.7
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.55,
+      "roughness": 0.4,
+      "hidden": false
+    },
+    {
+      "id": "fire-rail-out-0",
+      "name": "Fire escape rail",
+      "shape": "box",
+      "color": "#2f3438",
+      "position": [
+        -6.84,
+        5.3,
+        0.55
+      ],
+      "size": [
+        0.08,
+        1.15,
+        2.7
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.55,
+      "roughness": 0.38,
+      "hidden": false
+    },
+    {
+      "id": "fire-rail-front-0",
+      "name": "Fire escape rail",
+      "shape": "box",
+      "color": "#2f3438",
+      "position": [
+        -6.42,
+        5.3,
+        1.88
+      ],
+      "size": [
+        0.86,
+        1.15,
+        0.08
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.55,
+      "roughness": 0.38,
+      "hidden": false
+    },
+    {
+      "id": "fire-rail-back-0",
+      "name": "Fire escape rail",
+      "shape": "box",
+      "color": "#2f3438",
+      "position": [
+        -6.42,
+        5.3,
+        -0.78
+      ],
+      "size": [
+        0.86,
+        1.15,
+        0.08
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.55,
+      "roughness": 0.38,
+      "hidden": false
+    },
+    {
+      "id": "fire-platform-1",
+      "name": "Fire escape platform",
+      "shape": "box",
+      "color": "#2f3438",
+      "position": [
+        -6.42,
+        7.05,
+        0.55
+      ],
+      "size": [
+        0.9,
+        0.14,
+        2.7
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.55,
+      "roughness": 0.4,
+      "hidden": false
+    },
+    {
+      "id": "fire-rail-out-1",
+      "name": "Fire escape rail",
+      "shape": "box",
+      "color": "#2f3438",
+      "position": [
+        -6.84,
+        7.7,
+        0.55
+      ],
+      "size": [
+        0.08,
+        1.15,
+        2.7
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.55,
+      "roughness": 0.38,
+      "hidden": false
+    },
+    {
+      "id": "fire-rail-front-1",
+      "name": "Fire escape rail",
+      "shape": "box",
+      "color": "#2f3438",
+      "position": [
+        -6.42,
+        7.7,
+        1.88
+      ],
+      "size": [
+        0.86,
+        1.15,
+        0.08
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.55,
+      "roughness": 0.38,
+      "hidden": false
+    },
+    {
+      "id": "fire-rail-back-1",
+      "name": "Fire escape rail",
+      "shape": "box",
+      "color": "#2f3438",
+      "position": [
+        -6.42,
+        7.7,
+        -0.78
+      ],
+      "size": [
+        0.86,
+        1.15,
+        0.08
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.55,
+      "roughness": 0.38,
+      "hidden": false
+    },
+    {
+      "id": "ladder-rail-m6_67",
+      "name": "Fire escape ladder rail",
+      "shape": "box",
+      "color": "#2f3438",
+      "position": [
+        -6.67,
+        5.82,
+        -0.65
+      ],
+      "size": [
+        0.07,
+        3.4,
+        0.07
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.55,
+      "roughness": 0.38,
+      "hidden": false
+    },
+    {
+      "id": "ladder-rail-m6_17",
+      "name": "Fire escape ladder rail",
+      "shape": "box",
+      "color": "#2f3438",
+      "position": [
+        -6.17,
+        5.82,
+        -0.65
+      ],
+      "size": [
+        0.07,
+        3.4,
+        0.07
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.55,
+      "roughness": 0.38,
+      "hidden": false
+    },
+    {
+      "id": "ladder-rung-0",
+      "name": "Fire escape ladder rung",
+      "shape": "box",
+      "color": "#2f3438",
+      "position": [
+        -6.42,
+        4.35,
+        -0.65
+      ],
+      "size": [
+        0.58,
+        0.06,
+        0.07
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.55,
+      "roughness": 0.38,
+      "hidden": false
+    },
+    {
+      "id": "ladder-rung-1",
+      "name": "Fire escape ladder rung",
+      "shape": "box",
+      "color": "#2f3438",
+      "position": [
+        -6.42,
+        4.78,
+        -0.65
+      ],
+      "size": [
+        0.58,
+        0.06,
+        0.07
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.55,
+      "roughness": 0.38,
+      "hidden": false
+    },
+    {
+      "id": "ladder-rung-2",
+      "name": "Fire escape ladder rung",
+      "shape": "box",
+      "color": "#2f3438",
+      "position": [
+        -6.42,
+        5.21,
+        -0.65
+      ],
+      "size": [
+        0.58,
+        0.06,
+        0.07
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.55,
+      "roughness": 0.38,
+      "hidden": false
+    },
+    {
+      "id": "ladder-rung-3",
+      "name": "Fire escape ladder rung",
+      "shape": "box",
+      "color": "#2f3438",
+      "position": [
+        -6.42,
+        5.64,
+        -0.65
+      ],
+      "size": [
+        0.58,
+        0.06,
+        0.07
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.55,
+      "roughness": 0.38,
+      "hidden": false
+    },
+    {
+      "id": "ladder-rung-4",
+      "name": "Fire escape ladder rung",
+      "shape": "box",
+      "color": "#2f3438",
+      "position": [
+        -6.42,
+        6.07,
+        -0.65
+      ],
+      "size": [
+        0.58,
+        0.06,
+        0.07
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.55,
+      "roughness": 0.38,
+      "hidden": false
+    },
+    {
+      "id": "ladder-rung-5",
+      "name": "Fire escape ladder rung",
+      "shape": "box",
+      "color": "#2f3438",
+      "position": [
+        -6.42,
+        6.5,
+        -0.65
+      ],
+      "size": [
+        0.58,
+        0.06,
+        0.07
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.55,
+      "roughness": 0.38,
+      "hidden": false
+    },
+    {
+      "id": "ladder-rung-6",
+      "name": "Fire escape ladder rung",
+      "shape": "box",
+      "color": "#2f3438",
+      "position": [
+        -6.42,
+        6.93,
+        -0.65
+      ],
+      "size": [
+        0.58,
+        0.06,
+        0.07
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.55,
+      "roughness": 0.38,
+      "hidden": false
+    },
+    {
+      "id": "ladder-rung-7",
+      "name": "Fire escape ladder rung",
+      "shape": "box",
+      "color": "#2f3438",
+      "position": [
+        -6.42,
+        7.36,
+        -0.65
+      ],
+      "size": [
+        0.58,
+        0.06,
+        0.07
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.55,
+      "roughness": 0.38,
+      "hidden": false
+    },
+    {
+      "id": "rear-service-door",
+      "name": "Rear service door",
+      "shape": "box",
+      "color": "#383d42",
+      "position": [
+        2.8,
+        1.45,
+        -4.48
+      ],
+      "size": [
+        1.6,
+        2.8,
+        0.15
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.74,
+      "hidden": false
+    },
+    {
+      "id": "rear-door-frame",
+      "name": "Rear door frame",
+      "shape": "box",
+      "color": "#77736d",
+      "position": [
+        2.8,
+        2.95,
+        -4.55
+      ],
+      "size": [
+        2.0,
+        0.2,
+        0.2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0,
+      "roughness": 0.82,
+      "hidden": false
+    },
+    {
+      "id": "entry-light-0",
+      "name": "Entry wall light",
+      "shape": "box",
+      "color": "#e7c88b",
+      "position": [
+        -1.9,
+        2.65,
+        4.82
+      ],
+      "size": [
+        0.22,
+        0.42,
+        0.16
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.1,
+      "roughness": 0.18,
+      "hidden": false
+    },
+    {
+      "id": "entry-light-1",
+      "name": "Entry wall light",
+      "shape": "box",
+      "color": "#e7c88b",
+      "position": [
+        1.9,
+        2.65,
+        4.82
+      ],
+      "size": [
+        0.22,
+        0.42,
+        0.16
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "metallic": 0.1,
+      "roughness": 0.18,
+      "hidden": false
+    }
+  ]
+};
+
+const finalAssets=assets.map(asset=>asset.id===REBUILT_APARTMENT.id?REBUILT_APARTMENT:asset);
+
+export const ASSET_LIBRARY=Object.freeze(finalAssets);
+export const ASSET_BY_ID=Object.freeze(Object.fromEntries(finalAssets.map(asset=>[asset.id,asset])));

@@ -40,11 +40,28 @@
         <input id="asset-search" type="search" placeholder="building, car, prop…" autocomplete="off">
       </label>
 
+      <div class="import-toolbar">
+        <button id="import-file-button" class="primary">IMPORT JSON</button>
+        <button id="import-paste-button">PASTE JSON</button>
+        <input id="asset-file-input" type="file" accept=".json,application/json" hidden>
+      </div>
+
+      <section id="import-panel" class="import-panel" hidden>
+        <span class="kicker">JSON IMPORTER</span>
+        <textarea id="import-json-input" spellcheck="false" placeholder='Paste an exported RiftAssets .asset.json here'></textarea>
+        <div class="import-actions">
+          <button id="import-apply-button" class="primary">LOAD ASSET</button>
+          <button id="import-cancel-button">CANCEL</button>
+        </div>
+        <small id="import-status">Imports are validated before loading.</small>
+      </section>
+
       <div id="asset-list" class="asset-list"></div>
 
-      <div class="panel-footer">
+      <div class="panel-footer panel-footer-three">
         <button id="reset-asset">RESET ASSET</button>
-        <button id="clear-drafts" class="danger-ghost">CLEAR ALL DRAFTS</button>
+        <button id="remove-imported" class="danger-ghost">REMOVE IMPORT</button>
+        <button id="clear-drafts" class="danger-ghost">CLEAR DRAFTS</button>
       </div>
     </aside>
 

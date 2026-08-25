@@ -2,6 +2,7 @@ import { ASSET_LIBRARY, ASSET_BY_ID } from './assets/definitions.js';
 import { buildAsset, syncPartFromMesh, applyPartToRecord, assetStats } from './assets/builders.js';
 
 const DRAFT_KEY='riftassets-lab-drafts-v1';
+const IMPORTED_KEY='riftassets-lab-imported-v1';
 const $=selector=>document.querySelector(selector);
 const canvas=$('#preview-canvas');
 const status=$('#lab-status');
@@ -68,6 +69,7 @@ let night=false;
 let showWireframe=false;
 let showBounds=false;
 let dragSnapshot=null;
+let importedAssets=loadImportedAssets();
 
 boot();
 
@@ -83,12 +85,12 @@ function boot(){
   window.addEventListener('resize',()=>engine.resize());
 }
 
-function loadAsset(id,{preserveHistory=false}={}){
-  const source=ASSET_BY_ID[id];
+function loadAsset(id,{preserveHistory=false,ignoreDraft=false}={}){
+  const source=getAssetSource(id);
   if(!source)return;
   saveCurrentDraft();
   currentAssetId=id;
-  currentAsset=getDraft(id)||clone(source);
+  currentAsset=ignoreDraft?clone(source):(getDraft(id)||clone(source));
   selectedPartId=null;
   instance?.dispose?.();
   highlight.removeAllMeshes();
@@ -107,6 +109,34 @@ function loadAsset(id,{preserveHistory=false}={}){
 
 function bindUi(){
   $('#asset-search').addEventListener('input',renderAssetList);
+
+  const fileInput=$('#asset-file-input');
+  $('#import-file-button').addEventListener('click',()=>fileInput.click());
+  $('#import-paste-button').addEventListener('click',()=>{
+    $('#import-panel').hidden=false;
+    $('#import-json-input').focus();
+    setImportStatus('Paste a RiftAssets asset JSON, then tap LOAD ASSET.');
+  });
+  $('#import-cancel-button').addEventListener('click',()=>{
+    $('#import-panel').hidden=true;
+    $('#import-json-input').value='';
+    setImportStatus('Imports are validated before loading.');
+  });
+  $('#import-apply-button').addEventListener('click',()=>{
+    importAssetText($('#import-json-input').value,'pasted JSON');
+  });
+  fileInput.addEventListener('change',async()=>{
+    const file=fileInput.files?.[0];
+    if(!file)return;
+    try{
+      const text=await file.text();
+      await importAssetText(text,file.name);
+    }catch(error){
+      setImportStatus(error?.message||'Could not read that JSON file.',true);
+    }finally{
+      fileInput.value='';
+    }
+  });
 
   document.querySelectorAll('[data-mode]').forEach(button=>{
     button.addEventListener('click',()=>setMode(button.dataset.mode));
@@ -186,6 +216,7 @@ function bindUi(){
   $('#undo-button').addEventListener('click',undo);
   $('#redo-button').addEventListener('click',redo);
   $('#reset-asset').addEventListener('click',resetCurrentAsset);
+  $('#remove-imported').addEventListener('click',removeCurrentImport);
   $('#clear-drafts').addEventListener('click',clearAllDrafts);
 
   $('#export-json').addEventListener('click',exportJson);
@@ -221,7 +252,7 @@ function bindUi(){
 
 function renderAssetList(){
   const query=$('#asset-search')?.value?.trim().toLowerCase()||'';
-  const filtered=ASSET_LIBRARY.filter(asset=>{
+  const filtered=getAssetLibrary().filter(asset=>{
     if(!query)return true;
     return `${asset.name} ${asset.category} ${asset.description}`.toLowerCase().includes(query);
   });
@@ -236,7 +267,7 @@ function renderAssetList(){
     ${items.map(asset=>`
       <button class="asset-item ${asset.id===currentAssetId?'active':''}" data-asset-id="${asset.id}">
         <strong>${escapeHtml(asset.name)}</strong>
-        <small>${asset.parts.length} parts</small>
+        <small>${asset.parts.length} parts${importedAssets[asset.id]?' · <span class="imported-badge">IMPORTED</span>':''}</small>
       </button>
     `).join('')}
   `).join('')||'<div class="asset-group-title">No matches</div>';
@@ -441,7 +472,7 @@ function redo(){
 }
 
 function resetCurrentAsset(){
-  const source=ASSET_BY_ID[currentAssetId];if(!source)return;
+  const source=getAssetSource(currentAssetId);if(!source)return;
   pushUndo();
   removeDraft(currentAssetId);
   currentAsset=clone(source);
@@ -451,7 +482,7 @@ function resetCurrentAsset(){
 
 function clearAllDrafts(){
   try{localStorage.removeItem(DRAFT_KEY);}catch(_){}
-  currentAsset=clone(ASSET_BY_ID[currentAssetId]);
+  currentAsset=clone(getAssetSource(currentAssetId));
   undoStack=[];redoStack=[];
   rebuildAsset(currentAsset.parts[0]?.id);
   say('All local asset drafts cleared.');
@@ -475,6 +506,153 @@ function removeDraft(id){
 }
 function loadDrafts(){
   try{return JSON.parse(localStorage.getItem(DRAFT_KEY)||'{}')||{};}catch(_){return {};}
+}
+
+
+async function importAssetText(text,sourceLabel='JSON'){
+  const importPanel=$('#import-panel');
+  try{
+    const parsed=JSON.parse(String(text||''));
+    const asset=validateImportedAsset(parsed);
+    saveCurrentDraft();
+    importedAssets[asset.id]=asset;
+    saveImportedAssets();
+    removeDraft(asset.id);
+    loadAsset(asset.id,{ignoreDraft:true});
+    removeDraft(asset.id);
+    saveCurrentDraft();
+    $('#import-json-input').value='';
+    if(importPanel)importPanel.hidden=true;
+    renderAssetList();
+    setImportStatus(`Imported ${asset.name} from ${sourceLabel}.`,false,true);
+    say(`Imported ${asset.name}. ${asset.parts.length} editable parts loaded.`);
+    document.body.classList.remove('library-open');
+    document.body.classList.add('inspector-open');
+  }catch(error){
+    if(importPanel)importPanel.hidden=false;
+    setImportStatus(error?.message||'Invalid asset JSON.',true);
+    say(`Import failed: ${error?.message||'invalid JSON'}`);
+  }
+}
+
+function validateImportedAsset(value){
+  if(!value||typeof value!=='object'||Array.isArray(value))throw new Error('Asset JSON must contain one asset object.');
+  const id=String(value.id||'').trim();
+  if(!id)throw new Error('Asset is missing an id.');
+  if(!/^[a-z0-9][a-z0-9._-]{0,79}$/i.test(id))throw new Error('Asset id can only use letters, numbers, dot, underscore and dash.');
+  const name=String(value.name||'').trim();
+  if(!name)throw new Error('Asset is missing a name.');
+  if(!Array.isArray(value.parts)||!value.parts.length)throw new Error('Asset must contain at least one part.');
+  if(value.parts.length>2500)throw new Error('Asset has too many parts for the browser editor (2500 max).');
+
+  const seen=new Set();
+  const parts=value.parts.map((raw,index)=>{
+    if(!raw||typeof raw!=='object'||Array.isArray(raw))throw new Error(`Part ${index+1} is not a valid object.`);
+    const partId=String(raw.id||'').trim();
+    if(!partId)throw new Error(`Part ${index+1} is missing an id.`);
+    if(seen.has(partId))throw new Error(`Duplicate part id: ${partId}`);
+    seen.add(partId);
+    const shape=String(raw.shape||'box').toLowerCase();
+    if(!['box','cylinder','sphere'].includes(shape))throw new Error(`Unsupported shape "${shape}" in ${partId}.`);
+    const position=validateVector(raw.position,[0,0,0],`${partId} position`);
+    const rotation=validateVector(raw.rotation,[0,0,0],`${partId} rotation`);
+    const size=validateVector(raw.size,[1,1,1],`${partId} size`).map((n,axis)=>{
+      if(n<=0)throw new Error(`${partId} size values must be greater than 0.`);
+      return Math.max(.01,n);
+    });
+    const color=String(raw.color||'#777777');
+    if(!/^#[0-9a-f]{6}$/i.test(color))throw new Error(`${partId} has an invalid color. Use #RRGGBB.`);
+    return {
+      ...raw,
+      id:partId,
+      name:String(raw.name||partId),
+      shape,
+      color,
+      position,
+      rotation,
+      size,
+      metallic:clamp01(raw.metallic??0),
+      roughness:clamp01(raw.roughness??.82),
+      hidden:raw.hidden===true
+    };
+  });
+
+  const cameraRadius=Number(value.cameraRadius);
+  return {
+    ...value,
+    id,
+    name,
+    category:String(value.category||'Imported').trim()||'Imported',
+    description:String(value.description||'Imported RiftAssets definition.'),
+    cameraRadius:Number.isFinite(cameraRadius)&&cameraRadius>0?cameraRadius:18,
+    parts
+  };
+}
+
+function validateVector(value,fallback,label){
+  const source=Array.isArray(value)?value:fallback;
+  return [0,1,2].map(index=>{
+    const n=Number(source[index]??fallback[index]);
+    if(!Number.isFinite(n))throw new Error(`${label} contains a non-numeric value.`);
+    return Math.round(n*1000)/1000;
+  });
+}
+
+function getAssetLibrary(){
+  const merged=new Map(ASSET_LIBRARY.map(asset=>[asset.id,asset]));
+  for(const asset of Object.values(importedAssets||{}))merged.set(asset.id,asset);
+  return [...merged.values()];
+}
+
+function getAssetSource(id){
+  return importedAssets?.[id]||ASSET_BY_ID[id]||null;
+}
+
+function loadImportedAssets(){
+  try{
+    const parsed=JSON.parse(localStorage.getItem(IMPORTED_KEY)||'{}');
+    return parsed&&typeof parsed==='object'&&!Array.isArray(parsed)?parsed:{};
+  }catch(_){return {};}
+}
+
+function saveImportedAssets(){
+  try{localStorage.setItem(IMPORTED_KEY,JSON.stringify(importedAssets||{}));}catch(_){}
+}
+
+function removeCurrentImport(){
+  if(!importedAssets?.[currentAssetId]){
+    say('Current asset is built into Pack 01; there is no imported override to remove.');
+    return;
+  }
+  const id=currentAssetId;
+  delete importedAssets[id];
+  saveImportedAssets();
+  removeDraft(id);
+  const fallback=ASSET_BY_ID[id];
+  if(fallback){
+    loadAsset(id,{ignoreDraft:true});
+    removeDraft(id);
+    saveCurrentDraft();
+    say('Imported override removed. Built-in asset restored.');
+  }else{
+    const next=ASSET_LIBRARY[0]?.id;
+    if(next)loadAsset(next);
+    say('Imported asset removed from the library.');
+  }
+  renderAssetList();
+}
+
+function setImportStatus(message,isError=false,isSuccess=false){
+  const target=$('#import-status');
+  if(!target)return;
+  target.textContent=message;
+  target.classList.toggle('error',!!isError);
+  target.classList.toggle('success',!!isSuccess&&!isError);
+}
+
+function clamp01(value){
+  const n=Number(value);
+  return Number.isFinite(n)?Math.max(0,Math.min(1,n)):0;
 }
 
 function exportJson(){

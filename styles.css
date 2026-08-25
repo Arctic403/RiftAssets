@@ -132,3 +132,21 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
   .scene-stats div{min-width:48px;padding:6px}.scene-stats span{font-size:.38rem}
   .viewport-title small{display:none}
 }
+
+
+/* Asset JSON importer */
+.import-toolbar{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:8px;border-bottom:1px solid var(--line)}
+.import-toolbar button{min-width:0}
+.import-panel{padding:9px;border-bottom:1px solid var(--line);background:#0a0d10}
+.import-panel textarea{min-height:150px;margin-top:7px;font:11px/1.35 ui-monospace,SFMono-Regular,Menlo,monospace;resize:vertical}
+.import-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px}
+#import-status{display:block;margin-top:6px;color:var(--muted);font-size:.53rem;line-height:1.35}
+#import-status.error{color:#f0a0a0}
+#import-status.success{color:#9fd5a5}
+.panel-footer-three{grid-template-columns:1fr 1fr}
+.panel-footer-three #clear-drafts{grid-column:1/-1}
+.asset-item small .imported-badge,.imported-badge{color:var(--accent);font-weight:900}
+@media(max-width:900px){
+  .import-panel textarea{min-height:190px;font-size:16px}
+  .import-toolbar button{min-height:44px}
+}
