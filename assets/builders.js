@@ -58,9 +58,11 @@ export function applyPartToRecord(B,part,record) {
   mesh.rotation.set(...vector3(part.rotation,[0,0,0]).map(deg=>deg*Math.PI/180));
   applyShapeScale(mesh,part.shape,vector3(part.size,[1,1,1]));
   mesh.setEnabled(part.hidden!==true);
-  material.albedoColor=B.Color3.FromHexString(normalizeHex(part.color));
-  material.metallic=clamp(Number(part.metallic??0),0,1);
-  material.roughness=clamp(Number(part.roughness??.82),0,1);
+  const color=B.Color3.FromHexString(normalizeHex(part.color));
+  if('albedoColor' in material)material.albedoColor=color;
+  else if('diffuseColor' in material)material.diffuseColor=color;
+  if('metallic' in material)material.metallic=clamp(Number(part.metallic??0),0,1);
+  if('roughness' in material)material.roughness=clamp(Number(part.roughness??.82),0,1);
 }
 
 export function assetStats(assetInstance) {

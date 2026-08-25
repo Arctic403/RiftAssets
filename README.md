@@ -43,3 +43,20 @@ The goal is for RiftCity to consume the same asset-definition format after an as
 ## Pack 01 update
 
 `apartment-03f-01` now uses the rebuilt 165-part apartment definition with framed inset windows, proper balconies, a recessed entrance, roof detail, side windows and a multi-piece fire escape.
+
+## Phase 2 — real mesh proof
+
+`apartment-03f-01` is now a real embedded glTF model instead of a browser-generated primitive stack.
+
+- 5,078 vertices
+- 8,936 triangles
+- 10 PBR material groups
+- chamfered building mass and slabs
+- recessed framed windows
+- modeled balcony rails/supports
+- rooftop HVAC/vents
+- side/rear facade detail
+- modeled fire escape
+- mobile-targeted geometry
+
+The Asset Lab loads Babylon's glTF loader and can inspect/select the imported model's mesh/material groups. Primitive add/delete topology controls are intentionally disabled for real-model assets in this proof pass.

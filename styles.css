@@ -150,3 +150,9 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
   .import-panel textarea{min-height:190px;font-size:16px}
   .import-toolbar button{min-height:44px}
 }
+
+/* Real glTF proof assets */
+.model-badge{color:#8fd4ff;font-weight:950;letter-spacing:.08em}
+.model-asset-note{background:linear-gradient(135deg,rgba(38,77,98,.22),rgba(214,141,53,.08))}
+.model-asset-note strong{color:#bfe8ff}
+.model-asset-note small{line-height:1.45}

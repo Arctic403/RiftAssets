@@ -97,6 +97,12 @@
         <small id="selected-part-type">Click a part of the asset.</small>
       </section>
 
+      <section id="model-asset-note" class="inspector-section model-asset-note" hidden>
+        <span class="kicker">REAL MODEL ASSET</span>
+        <strong>glTF mesh preview</strong>
+        <small>This asset is loaded from a real model file. You can inspect/select its material mesh groups and adjust transforms/materials, but topology is no longer generated from browser boxes.</small>
+      </section>
+
       <section class="inspector-section">
         <div class="section-title">
           <span>PARTS</span>
@@ -157,6 +163,7 @@
   </div>
 
   <script src="https://cdn.babylonjs.com/babylon.js"></script>
+  <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
   <script type="module" src="./app.js"></script>
 </body>
 </html>

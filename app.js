@@ -1,5 +1,6 @@
 import { ASSET_LIBRARY, ASSET_BY_ID } from './assets/definitions.js';
 import { buildAsset, syncPartFromMesh, applyPartToRecord, assetStats } from './assets/builders.js';
+import { loadModelAsset } from './assets/model-loader.js';
 
 const DRAFT_KEY='riftassets-lab-drafts-v1';
 const IMPORTED_KEY='riftassets-lab-imported-v1';
@@ -73,10 +74,10 @@ let importedAssets=loadImportedAssets();
 
 boot();
 
-function boot(){
+async function boot(){
   renderAssetList();
   bindUi();
-  loadAsset(currentAssetId);
+  await loadAsset(currentAssetId);
   hookGizmoHistory();
   engine.runRenderLoop(()=>{
     syncSelectedFromMesh();
@@ -85,26 +86,52 @@ function boot(){
   window.addEventListener('resize',()=>engine.resize());
 }
 
-function loadAsset(id,{preserveHistory=false,ignoreDraft=false}={}){
+async function loadAsset(id,{preserveHistory=false,ignoreDraft=false}={}){
   const source=getAssetSource(id);
   if(!source)return;
   saveCurrentDraft();
   currentAssetId=id;
-  currentAsset=ignoreDraft?clone(source):(getDraft(id)||clone(source));
+  const savedDraft=source.modelUrl?getDraft(id):null;
+  currentAsset=ignoreDraft?clone(source):(savedDraft||getDraft(id)||clone(source));
   selectedPartId=null;
   instance?.dispose?.();
   highlight.removeAllMeshes();
-  instance=buildAsset(B,scene,shadows,currentAsset);
-  camera.radius=currentAsset.cameraRadius||18;
-  camera.target.set(0,Math.min(6,(currentAsset.cameraRadius||18)*.18),0);
+
+  try{
+    if(source.modelUrl){
+      currentAsset={...clone(source),parts:Array.isArray(currentAsset.parts)?currentAsset.parts:[]};
+      say(`Loading real model ${source.name}…`);
+      instance=await loadModelAsset(B,scene,shadows,source,{overrides:currentAsset.parts});
+      currentAsset.parts=instance.parts;
+      const bounds=instance.getBounds?.();
+      if(bounds){
+        camera.target.copyFrom(bounds.center);
+        const longest=Math.max(bounds.size.x,bounds.size.y,bounds.size.z);
+        camera.radius=Math.max(6,longest*1.45);
+      }else{
+        camera.radius=currentAsset.cameraRadius||18;
+        camera.target.set(0,Math.min(6,(currentAsset.cameraRadius||18)*.18),0);
+      }
+    }else{
+      instance=buildAsset(B,scene,shadows,currentAsset);
+      camera.radius=currentAsset.cameraRadius||18;
+      camera.target.set(0,Math.min(6,(currentAsset.cameraRadius||18)*.18),0);
+    }
+  }catch(error){
+    console.error(error);
+    say(`Model load failed: ${error?.message||'unknown error'}`);
+    return;
+  }
+
   if(!preserveHistory){undoStack=[];redoStack=[];}
   refreshAssetHeader();
+  refreshModelModeUi();
   renderAssetList();
   renderParts();
   selectPart(currentAsset.parts?.[0]?.id||null);
   refreshStats();
   applyDebugVisuals();
-  say(`Loaded ${currentAsset.name}.`);
+  say(source.modelUrl?`Loaded real glTF model: ${currentAsset.name}.`:`Loaded ${currentAsset.name}.`);
 }
 
 function bindUi(){
@@ -267,7 +294,7 @@ function renderAssetList(){
     ${items.map(asset=>`
       <button class="asset-item ${asset.id===currentAssetId?'active':''}" data-asset-id="${asset.id}">
         <strong>${escapeHtml(asset.name)}</strong>
-        <small>${asset.parts.length} parts${importedAssets[asset.id]?' · <span class="imported-badge">IMPORTED</span>':''}</small>
+        <small>${asset.modelUrl?'<span class="model-badge">REAL MODEL</span>':`${asset.parts?.length||0} parts`}${importedAssets[asset.id]?' · <span class="imported-badge">IMPORTED</span>':''}</small>
       </button>
     `).join('')}
   `).join('')||'<div class="asset-group-title">No matches</div>';
@@ -384,6 +411,7 @@ function setMode(next){
 }
 
 function addPart(shape){
+  if(isModelAsset())return say('Real model topology is stored in the glTF file; browser primitive parts cannot be added to it.');
   pushUndo();
   const id=uniquePartId(shape);
   const colors={box:'#76706a',cylinder:'#5a6065',sphere:'#3e5b45'};
@@ -396,6 +424,7 @@ function addPart(shape){
 }
 
 function duplicatePart(){
+  if(isModelAsset())return say('Duplicate mesh topology is disabled for real model assets in this proof pass.');
   const source=getSelectedPart();if(!source)return;
   pushUndo();
   const copy=clone(source);
@@ -417,6 +446,7 @@ function togglePartHidden(){
 }
 
 function deletePart(){
+  if(isModelAsset())return say('Deleting glTF topology is disabled in this proof pass; use HIDE for inspection instead.');
   const part=getSelectedPart();if(!part)return;
   pushUndo();
   const index=currentAsset.parts.findIndex(row=>row.id===part.id);
@@ -437,6 +467,7 @@ function focusSelected(){
 }
 
 function rebuildAsset(selectId=selectedPartId){
+  if(isModelAsset())return say('Real model topology is not rebuilt from browser primitives.');
   instance?.dispose?.();
   highlight.removeAllMeshes();
   instance=buildAsset(B,scene,shadows,currentAsset);
@@ -471,20 +502,28 @@ function redo(){
   say('Redo.');
 }
 
-function resetCurrentAsset(){
+async function resetCurrentAsset(){
   const source=getAssetSource(currentAssetId);if(!source)return;
   pushUndo();
   removeDraft(currentAssetId);
-  currentAsset=clone(source);
-  rebuildAsset(currentAsset.parts[0]?.id);
-  say('Asset reset to Pack 01 definition.');
+  if(source.modelUrl){
+    await loadAsset(currentAssetId,{ignoreDraft:true});
+  }else{
+    currentAsset=clone(source);
+    rebuildAsset(currentAsset.parts[0]?.id);
+  }
+  say('Asset reset to its built-in definition.');
 }
 
-function clearAllDrafts(){
+async function clearAllDrafts(){
   try{localStorage.removeItem(DRAFT_KEY);}catch(_){}
-  currentAsset=clone(getAssetSource(currentAssetId));
   undoStack=[];redoStack=[];
-  rebuildAsset(currentAsset.parts[0]?.id);
+  const source=getAssetSource(currentAssetId);
+  if(source?.modelUrl)await loadAsset(currentAssetId,{ignoreDraft:true});
+  else{
+    currentAsset=clone(source);
+    rebuildAsset(currentAsset.parts[0]?.id);
+  }
   say('All local asset drafts cleared.');
 }
 
@@ -743,6 +782,15 @@ function makeGrid(){
   return root;
 }
 
+function isModelAsset(){return !!currentAsset?.modelUrl;}
+function refreshModelModeUi(){
+  const model=isModelAsset();
+  $('#model-asset-note').hidden=!model;
+  for(const id of ['add-box','add-cylinder','add-sphere','duplicate-part','delete-part']){
+    const button=$(`#${id}`);
+    if(button)button.disabled=model;
+  }
+}
 function getSelectedPart(){return currentAsset?.parts?.find(part=>part.id===selectedPartId)||null;}
 function getSelectedRecord(){return instance?.getRecord(selectedPartId)||null;}
 function uniquePartId(prefix){
