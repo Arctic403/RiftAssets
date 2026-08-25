@@ -2,9 +2,6 @@ import { MAP_LAYERS, PALETTES, createStarterMap } from './map/default-map.js';
 import { BUILDING_STYLES, PROP_STYLES, INTERACTION_STYLES, styleForBuilding, shadeHex } from './map/world-kit.js';
 
 const STORAGE_KEY='riftcity-25d-map-draft-v2';
-const ISO_X=.5;
-const ISO_Y=.25;
-const FLOOR_HEIGHT=50;
 const $=selector=>document.querySelector(selector);
 const canvas=$('#map-canvas');
 const minimap=$('#minimap');
@@ -15,7 +12,7 @@ const status=$('#status');
 const state={
   map:loadDraft()||createStarterMap(),
   tool:'select',
-  view:'iso',
+  view:'plan',
   night:false,
   palette:{
     building:PALETTES.building[0].id,
@@ -61,7 +58,7 @@ function init(){
   refreshStats();
   resizeCanvas();
   requestAnimationFrame(()=>{
-    focusCurrentView(true);
+    fitMap();
     requestAnimationFrame(frame);
   });
 }
@@ -78,8 +75,6 @@ function bindUi(){
     button.addEventListener('click',()=>setTool(button.dataset.tool));
   });
 
-  $('#view-plan').addEventListener('click',()=>setView('plan'));
-  $('#view-iso').addEventListener('click',()=>setView('iso'));
   $('#lighting-toggle').addEventListener('click',toggleLighting);
 
   $('#preview-toggle').addEventListener('click',togglePreview);
@@ -134,11 +129,8 @@ function bindUi(){
   $('#zoom-in').addEventListener('click',()=>zoomAt(canvas.clientWidth/2,canvas.clientHeight/2,1.2));
   $('#zoom-out').addEventListener('click',()=>zoomAt(canvas.clientWidth/2,canvas.clientHeight/2,1/1.2));
   $('#zoom-reset').addEventListener('click',()=>{
-    if(state.view==='iso')ensureIsoReviewZoom(true);
-    else{
-      state.camera.zoom=1;
-      updateZoomLabel();
-    }
+    state.camera.zoom=1;
+    updateZoomLabel();
   });
 
   canvas.addEventListener('contextmenu',event=>event.preventDefault());
@@ -194,8 +186,6 @@ function bindUi(){
     if(mod&&event.code==='KeyY'){event.preventDefault();return redo();}
     if(mod&&event.code==='KeyD'){event.preventDefault();return duplicateSelected();}
     if(event.code==='Delete'||event.code==='Backspace'){event.preventDefault();return deleteSelected();}
-    if(event.code==='Digit1'){event.preventDefault();return setView('plan');}
-    if(event.code==='Digit2'){event.preventDefault();return setView('iso');}
     const shortcuts={KeyV:'select',KeyH:'pan',KeyR:'road',KeyB:'building',KeyP:'prop',KeyZ:'zone',KeyI:'interaction'};
     if(shortcuts[event.code]&&!mod){event.preventDefault();return setTool(shortcuts[event.code]);}
     if(!state.preview&&state.selected&&['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(event.code)){
@@ -214,26 +204,8 @@ function resizeCanvas(){
     canvas.width=width;
     canvas.height=height;
     ctx.setTransform(state.dpr,0,0,state.dpr,0,0);
-    if(state.view==='iso'&&state.camera.zoom>0)ensureIsoReviewZoom();
+
   }
-}
-
-function setView(view,announce=true){
-  if(view!=='plan'&&view!=='iso')return;
-  const previous=state.view;
-  state.view=view;
-  $('#view-plan').classList.toggle('active',view==='plan');
-  $('#view-iso').classList.toggle('active',view==='iso');
-
-  if(view==='plan'){
-    if(previous!=='plan')fitMap();
-  }else if(previous!=='iso'){
-    ensureIsoReviewZoom();
-  }
-
-  updateModeLabel();
-  updateZoomLabel();
-  if(announce)say(view==='iso'?'2.5D neighborhood review. Pan around the district; FIT MAP is only for an intentional full-city overview.':'Plan overview. The full district is fitted for layout work.');
 }
 
 function toggleLighting(){
@@ -254,7 +226,7 @@ function setTool(tool){
 }
 
 function updateModeLabel(){
-  $('#mode-label').textContent=state.preview?'WALK · 2.5D':`${state.tool.toUpperCase()} · ${state.view==='iso'?'2.5D':'PLAN'}`;
+  $('#mode-label').textContent=state.preview?'WALK · 2D':`${state.tool.toUpperCase()} · 2D`;
 }
 
 function renderLayers(){
@@ -503,64 +475,15 @@ function updateZoomLabel(){
   $('#zoom-reset').textContent=`${Math.round(state.camera.zoom*100)}%`;
 }
 
-function preferredIsoZoom(){
-  const width=canvas.clientWidth||window.innerWidth||390;
-  if(width<=430)return .40;
-  if(width<=700)return .44;
-  if(width<=980)return .48;
-  return .56;
-}
-
-function preferredWalkZoom(){
-  const width=canvas.clientWidth||window.innerWidth||390;
-  if(width<=430)return .52;
-  if(width<=700)return .56;
-  return .62;
-}
-
-function ensureIsoReviewZoom(force=false){
-  const preferred=preferredIsoZoom();
-  if(force||state.camera.zoom<preferred*.82||state.camera.zoom>preferred*2.2){
-    state.camera.zoom=preferred;
-  }
-  clampCamera();
-  updateZoomLabel();
-}
-
-function focusIsoReview(target=null,walk=false){
-  const focus=target||state.selected&&objectCenter(state.selected)||state.map.playerSpawn||{x:state.map.width/2,y:state.map.height/2};
-  state.camera.x=clamp(Number(focus.x)||state.map.width/2,0,state.map.width);
-  state.camera.y=clamp(Number(focus.y)||state.map.height/2,0,state.map.height);
-  state.camera.zoom=walk?preferredWalkZoom():preferredIsoZoom();
-  clampCamera();
-  updateZoomLabel();
-}
-
-function focusCurrentView(initial=false){
-  if(state.view==='plan'){
-    fitMap();
-    return;
-  }
-  const target=initial?(state.map.playerSpawn||{x:state.map.width/2,y:state.map.height/2}):null;
-  focusIsoReview(target,false);
-}
-
 function fitMap(){
   const rect=canvas.getBoundingClientRect();
   const padding=Math.min(120,Math.max(56,rect.width*.12));
-  let zoom;
-  if(state.view==='plan'){
-    zoom=Math.min((rect.width-padding)/state.map.width,(rect.height-padding)/state.map.height);
-  }else{
-    const projectedW=(state.map.width+state.map.height)*ISO_X;
-    const projectedH=(state.map.width+state.map.height)*ISO_Y+520;
-    zoom=Math.min((rect.width-padding)/projectedW,(rect.height-padding)/projectedH);
-  }
+  const zoom=Math.min((rect.width-padding)/state.map.width,(rect.height-padding)/state.map.height);
+  state.view='plan';
   state.camera.zoom=clamp(zoom,.08,2.5);
   state.camera.x=state.map.width/2;
   state.camera.y=state.map.height/2;
   updateZoomLabel();
-  if(state.view==='iso')say('Full-city 2.5D overview. Switch views or zoom in to return to neighborhood scale.');
 }
 
 function clampCamera(){
@@ -569,33 +492,21 @@ function clampCamera(){
   state.camera.y=clamp(state.camera.y,-margin,state.map.height+margin);
 }
 
-function screenDeltaToWorld(dx,dy,zoom,view){
-  if(view==='plan')return{x:dx/zoom,y:dy/zoom};
-  const a=dx/(ISO_X*zoom);
-  const b=dy/(ISO_Y*zoom);
-  return{x:(a+b)/2,y:(b-a)/2};
+function screenDeltaToWorld(dx,dy,zoom){
+  return{x:dx/zoom,y:dy/zoom};
 }
 
-function worldToScreen(x,y,z=0){
+function worldToScreen(x,y){
   const cx=canvas.clientWidth/2,cy=canvas.clientHeight/2;
-  const dx=x-state.camera.x,dy=y-state.camera.y;
-  if(state.view==='plan'){
-    return{x:cx+dx*state.camera.zoom,y:cy+dy*state.camera.zoom};
-  }
   return{
-    x:cx+(dx-dy)*ISO_X*state.camera.zoom,
-    y:cy+(dx+dy)*ISO_Y*state.camera.zoom-z*state.camera.zoom
+    x:cx+(x-state.camera.x)*state.camera.zoom,
+    y:cy+(y-state.camera.y)*state.camera.zoom
   };
 }
 
 function screenToWorld(x,y){
   const cx=canvas.clientWidth/2,cy=canvas.clientHeight/2;
-  if(state.view==='plan'){
-    return{x:state.camera.x+(x-cx)/state.camera.zoom,y:state.camera.y+(y-cy)/state.camera.zoom};
-  }
-  const a=(x-cx)/(ISO_X*state.camera.zoom);
-  const b=(y-cy)/(ISO_Y*state.camera.zoom);
-  return{x:state.camera.x+(a+b)/2,y:state.camera.y+(b-a)/2};
+  return{x:state.camera.x+(x-cx)/state.camera.zoom,y:state.camera.y+(y-cy)/state.camera.zoom};
 }
 
 function snapPoint(x,y){
@@ -620,8 +531,7 @@ function draw(now){
   ctx.fillStyle=state.night?'#080c12':'#12181b';
   ctx.fillRect(0,0,rect.width,rect.height);
 
-  if(state.view==='plan')drawPlan(now);
-  else drawIso(now);
+  drawPlan(now);
 
   drawMinimap();
 }
@@ -686,107 +596,110 @@ function drawPlanRoad(o){
 function drawPlanBuilding(o){
   const pts=footprintCorners(o).map(p=>worldToScreen(p.x,p.y));
   const style=resolvedBuildingStyle(o);
-  fillPolygon(pts,style.faceX);
-  strokePolygon(pts,'rgba(255,255,255,.18)',1.4);
-  const center=worldToScreen(o.x,o.y);
-  if(state.camera.zoom>.5){
-    ctx.fillStyle=state.night?'#e9d69d':'#e8e1d4';ctx.font=`700 ${clamp(10*state.camera.zoom,9,13)}px system-ui`;ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillText(`${o.label||o.kind} · ${o.floors||3}F`,center.x,center.y,Math.max(40,o.width*state.camera.zoom-10));
+  const z=state.camera.zoom;
+
+  const shadow=pts.map(p=>({x:p.x+Math.max(2,5*z),y:p.y+Math.max(2,6*z)}));
+  fillPolygon(shadow,state.night?'rgba(0,0,0,.38)':'rgba(0,0,0,.22)');
+
+  fillPolygon(pts,state.night?shadeHex(style.faceX,-.25):style.faceX);
+  strokePolygon(pts,state.night?'rgba(255,255,255,.12)':'rgba(255,255,255,.22)',Math.max(1,1.25*z));
+
+  const inset=clamp(10,5,Math.min(o.width,o.height)*.16);
+  const roof={...o,width:Math.max(4,o.width-inset*2),height:Math.max(4,o.height-inset*2)};
+  const roofPts=footprintCorners(roof).map(p=>worldToScreen(p.x,p.y));
+  fillPolygon(roofPts,state.night?shadeHex(style.top,-.18):style.top);
+  strokePolygon(roofPts,'rgba(0,0,0,.22)',Math.max(.8,z));
+
+  draw2DRoofDetails(o,style);
+
+  if(state.camera.zoom>.28||state.selected===o){
+    const center=worldToScreen(o.x,o.y);
+    draw2DBuildingLabel(o,center,style);
   }
+}
+
+function draw2DRoofDetails(o,style){
+  const p=worldToScreen(o.x,o.y);
+  const z=state.camera.zoom;
+  if(z<.22)return;
+  const angle=(Number(o.rotation)||0)*Math.PI/180;
+
+  ctx.save();
+  ctx.translate(p.x,p.y);
+  ctx.rotate(angle);
+  const w=o.width*z,h=o.height*z;
+
+  if(['office','hospital','bank'].includes(o.kind)){
+    ctx.fillStyle=state.night?'#3c4145':'#686d70';
+    ctx.fillRect(-w*.16,-h*.11,w*.32,h*.22);
+    ctx.strokeStyle='rgba(255,255,255,.16)';
+    ctx.strokeRect(-w*.16,-h*.11,w*.32,h*.22);
+  }else if(o.kind==='casino'||o.kind==='nightclub'){
+    ctx.fillStyle=style.accent||'#b47ed0';
+    ctx.fillRect(-w*.30,-h*.08,w*.60,h*.16);
+  }else if(o.kind==='corner-store'){
+    ctx.fillStyle=style.accent||'#c98643';
+    ctx.fillRect(-w*.42,h*.27,w*.84,Math.max(3,h*.08));
+  }else if(o.kind==='warehouse'){
+    ctx.strokeStyle='rgba(255,255,255,.18)';
+    ctx.lineWidth=Math.max(1,z);
+    for(let x=-w*.3;x<=w*.3;x+=Math.max(10,24*z)){
+      ctx.beginPath();ctx.moveTo(x,-h*.3);ctx.lineTo(x,h*.3);ctx.stroke();
+    }
+  }else{
+    ctx.fillStyle=state.night?'#464a4c':'#74797b';
+    ctx.fillRect(-w*.12,-h*.09,w*.24,h*.18);
+  }
+  ctx.restore();
+}
+
+function draw2DBuildingLabel(o,p,style){
+  const text=o.label||o.kind||'Building';
+  ctx.save();
+  ctx.font='800 10px system-ui';
+  const w=Math.min(170,ctx.measureText(text).width+14);
+  ctx.fillStyle=state.night?'rgba(5,8,11,.78)':'rgba(13,16,18,.72)';
+  ctx.fillRect(p.x-w/2,p.y-9,w,18);
+  ctx.fillStyle=style.accent||'#d78e36';
+  ctx.fillRect(p.x-w/2,p.y-9,3,18);
+  ctx.fillStyle='#f3eee7';
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(text,p.x,p.y,w-10);
+  ctx.restore();
 }
 
 function drawPlanProp(o){
-  const p=worldToScreen(o.x,o.y),r=Math.max(3,(o.radius||10)*state.camera.zoom);
-  ctx.fillStyle=o.color||'#777';ctx.beginPath();ctx.arc(p.x,p.y,r,0,Math.PI*2);ctx.fill();
-}
-
-function drawIso(now){
-  drawIsoGround();
-  if(state.grid)drawIsoGrid();
-  drawIsoZones('lots');
-  drawIsoZones('zones');
-  if(!state.hiddenLayers.has('roads'))for(const road of state.map.roads)drawIsoRoad(road);
-
-  const entities=[];
-  if(!state.hiddenLayers.has('buildings'))for(const o of state.map.buildings)entities.push({type:'building',o,depth:entityDepth(o)});
-  if(!state.hiddenLayers.has('props'))for(const o of state.map.props)entities.push({type:'prop',o,depth:entityDepth(o)});
-  if(state.preview)entities.push({type:'player',o:state.player,depth:state.player.x+state.player.y});
-  entities.sort((a,b)=>a.depth-b.depth);
-
-  for(const item of entities){
-    if(item.type==='building')drawIsoBuilding(item.o,now);
-    else if(item.type==='prop')drawIsoProp(item.o,now);
-    else drawPlayer(true);
-  }
-
-  drawSpawnMarker(true);
-  if(!state.hiddenLayers.has('interactions'))for(const interaction of state.map.interactions)drawInteractionMarker(interaction,now,true);
-  if(state.drawPreview)drawDraftPreview(state.drawPreview);
-  if(state.selected&&!state.preview)drawSelection(state.selected);
-}
-
-function drawIsoGround(){
-  const pts=[
-    worldToScreen(0,0),worldToScreen(state.map.width,0),
-    worldToScreen(state.map.width,state.map.height),worldToScreen(0,state.map.height)
-  ];
-  fillPolygon(pts,state.night?'#101819':'#1d2822');
-  strokePolygon(pts,state.night?'#334042':'#57665d',2);
-}
-
-function drawIsoGrid(){
-  const step=Math.max(state.map.gridSize,state.map.gridSize*4);
-  if(step*state.camera.zoom<16)return;
-  ctx.save();ctx.strokeStyle=state.night?'rgba(150,170,180,.055)':'rgba(255,255,255,.055)';ctx.lineWidth=1;
-  ctx.beginPath();
-  for(let x=0;x<=state.map.width;x+=step){
-    const a=worldToScreen(x,0),b=worldToScreen(x,state.map.height);ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);
-  }
-  for(let y=0;y<=state.map.height;y+=step){
-    const a=worldToScreen(0,y),b=worldToScreen(state.map.width,y);ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);
-  }
-  ctx.stroke();ctx.restore();
-}
-
-function drawIsoZones(layer){
-  if(state.hiddenLayers.has(layer))return;
-  for(const o of state.map.zones){
-    if((o.layer||'zones')!==layer)continue;
-    const pts=footprintCorners(o).map(p=>worldToScreen(p.x,p.y));
-    fillPolygon(pts,withAlpha(o.color||'#695a88',layer==='lots'?.18:.09));
-    strokePolygon(pts,withAlpha(o.color||'#695a88',layer==='lots'?.5:.62),1.2,layer==='zones'?[8,6]:[]);
-    if(layer==='zones'&&state.camera.zoom>.45)drawTextLabel(o.label,polygonCenter(pts),'#d8cae8');
-  }
-}
-
-function roadWorldPolygon(o,extra=0){
-  const dx=o.x2-o.x1,dy=o.y2-o.y1;
-  const len=Math.hypot(dx,dy)||1;
-  const px=-dy/len,py=dx/len;
-  const half=o.width/2+extra;
-  return[
-    {x:o.x1+px*half,y:o.y1+py*half},
-    {x:o.x2+px*half,y:o.y2+py*half},
-    {x:o.x2-px*half,y:o.y2-py*half},
-    {x:o.x1-px*half,y:o.y1-py*half}
-  ];
-}
-
-function drawIsoRoad(o){
-  const sidewalk=roadWorldPolygon(o,18).map(p=>worldToScreen(p.x,p.y));
-  const asphalt=roadWorldPolygon(o,0).map(p=>worldToScreen(p.x,p.y));
-  fillPolygon(sidewalk,state.night?'#444847':'#706f68');
-  fillPolygon(asphalt,o.style==='alley'?(state.night?'#24282c':'#30353a'):(state.night?'#292e34':o.color||'#353b41'));
-  strokePolygon(asphalt,'rgba(255,255,255,.08)',1);
-
-  const a=worldToScreen(o.x1,o.y1),b=worldToScreen(o.x2,o.y2);
+  const p=worldToScreen(o.x,o.y),z=state.camera.zoom;
+  const r=Math.max(3,(o.radius||10)*z);
   ctx.save();
-  ctx.setLineDash([13*state.camera.zoom+4,11*state.camera.zoom+4]);
-  ctx.strokeStyle=o.style==='alley'?'rgba(255,255,255,.12)':'rgba(229,213,161,.48)';
-  ctx.lineWidth=Math.max(1,1.8*state.camera.zoom);
-  ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();ctx.restore();
-}
+  ctx.translate(p.x,p.y);
+  ctx.rotate((Number(o.rotation)||0)*Math.PI/180);
 
+  if(o.kind==='tree'){
+    ctx.fillStyle='rgba(0,0,0,.2)';ctx.beginPath();ctx.ellipse(3*z,4*z,r*.95,r*.62,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle=state.night?'#2f5139':'#54785b';ctx.beginPath();ctx.arc(-r*.24,-r*.12,r*.72,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle=state.night?'#385f42':'#668c6a';ctx.beginPath();ctx.arc(r*.30,r*.02,r*.63,0,Math.PI*2);ctx.fill();
+  }else if(o.kind==='parked-car'){
+    const w=Math.max(12,42*z),h=Math.max(7,20*z);
+    ctx.fillStyle='rgba(0,0,0,.2)';ctx.fillRect(-w/2+2,-h/2+3,w,h);
+    ctx.fillStyle=o.color||'#687785';ctx.fillRect(-w/2,-h/2,w,h);
+    ctx.fillStyle='#263b47';ctx.fillRect(-w*.22,-h*.35,w*.44,h*.70);
+  }else if(o.kind==='streetlight'){
+    ctx.strokeStyle=o.color||'#879199';ctx.lineWidth=Math.max(1.5,2*z);ctx.beginPath();ctx.moveTo(0,-r*.8);ctx.lineTo(0,r*.8);ctx.stroke();
+    ctx.fillStyle=state.night?'#f4d58b':'#c9ced0';ctx.beginPath();ctx.arc(0,-r*.82,Math.max(2,3*z),0,Math.PI*2);ctx.fill();
+  }else if(o.kind==='bench'){
+    ctx.fillStyle=o.color||'#7e634d';ctx.fillRect(-r,-r*.35,r*2,r*.7);
+  }else if(o.kind==='dumpster'){
+    ctx.fillStyle=o.color||'#466052';ctx.fillRect(-r,-r*.7,r*2,r*1.4);
+    ctx.strokeStyle='rgba(255,255,255,.15)';ctx.strokeRect(-r,-r*.7,r*2,r*1.4);
+  }else if(o.kind==='bus-stop'){
+    ctx.fillStyle=o.color||'#536e7c';ctx.fillRect(-r*.75,-r*.18,r*1.5,r*.36);
+    ctx.fillStyle='#b8c4c8';ctx.fillRect(r*.45,-r*.8,Math.max(2,2*z),r*1.6);
+  }else{
+    ctx.fillStyle=o.color||'#777';ctx.beginPath();ctx.arc(0,0,r,0,Math.PI*2);ctx.fill();
+  }
+  ctx.restore();
+}
 
 function resolvedBuildingStyle(o){
   const base=styleForBuilding(o.style);
@@ -800,275 +713,11 @@ function resolvedBuildingStyle(o){
   };
 }
 
-function buildingElevation(o){
-  return clamp(Number(o.floors)||3,1,30)*FLOOR_HEIGHT;
-}
-
 function footprintCorners(o){
   const w=Math.max(2,Number(o.width)||2),h=Math.max(2,Number(o.height)||2);
   const local=[[-w/2,-h/2],[w/2,-h/2],[w/2,h/2],[-w/2,h/2]];
   const a=(Number(o.rotation)||0)*Math.PI/180,c=Math.cos(a),s=Math.sin(a);
   return local.map(([x,y])=>({x:o.x+x*c-y*s,y:o.y+x*s+y*c}));
-}
-
-function visibleBuildingEdges(corners){
-  const view={x:1,y:1};
-  const out=[];
-  for(let i=0;i<4;i++){
-    const a=corners[i],b=corners[(i+1)%4];
-    const dx=b.x-a.x,dy=b.y-a.y;
-    const normal={x:dy,y:-dx};
-    if(normal.x*view.x+normal.y*view.y>0)out.push(i);
-  }
-  return out;
-}
-
-function buildingGeometry(o){
-  const corners=footprintCorners(o);
-  const elevation=buildingElevation(o);
-  const base=corners.map(p=>worldToScreen(p.x,p.y,0));
-  const top=corners.map(p=>worldToScreen(p.x,p.y,elevation));
-  const edges=visibleBuildingEdges(corners);
-  const faces=edges.map(i=>{
-    const j=(i+1)%4;
-    return{edge:i,points:[base[i],base[j],top[j],top[i]],baseA:base[i],baseB:base[j],topA:top[i],topB:top[j],
-      span:Math.hypot(corners[j].x-corners[i].x,corners[j].y-corners[i].y)};
-  });
-  return{corners,base,top,faces,elevation};
-}
-
-function drawIsoBuilding(o,now){
-  const g=buildingGeometry(o);
-  const style=resolvedBuildingStyle(o);
-
-  drawBuildingGrounding(o,g,style);
-
-  for(const face of g.faces){
-    const tone=face.edge===1?style.faceX:style.faceY;
-    fillPolygon(face.points,state.night?shadeHex(tone,-.26):tone);
-    strokePolygon(face.points,'rgba(0,0,0,.28)',1);
-    drawFacade(o,face,style,now);
-    drawFoundationBand(face,style);
-  }
-
-  fillPolygon(g.top,state.night?shadeHex(style.top,-.22):style.top);
-  strokePolygon(g.top,'rgba(255,255,255,.13)',1.1);
-
-  drawRoofDetails(o,g,style);
-
-  if(isNamedLandmark(o)||state.selected===o||state.camera.zoom>.78){
-    const labelPoint=worldToScreen(o.x,o.y,g.elevation*.63);
-    drawBuildingLabel(o,labelPoint,style);
-  }
-}
-
-function expandedFootprint(o,padding){
-  const w=Math.max(2,Number(o.width)||2);
-  const h=Math.max(2,Number(o.height)||2);
-  const sx=(w+padding*2)/w;
-  const sy=(h+padding*2)/h;
-  const a=(Number(o.rotation)||0)*Math.PI/180,c=Math.cos(a),s=Math.sin(a);
-  const local=[[-w/2,-h/2],[w/2,-h/2],[w/2,h/2],[-w/2,h/2]];
-  return local.map(([x,y])=>{
-    const ex=x*sx,ey=y*sy;
-    return{x:o.x+ex*c-ey*s,y:o.y+ex*s+ey*c};
-  });
-}
-
-function drawBuildingGrounding(o,g,style){
-  const zoom=state.camera.zoom;
-  const apronWorld=expandedFootprint(o,Math.max(8,Math.min(18,Math.min(o.width,o.height)*.08)));
-  const apron=apronWorld.map(p=>worldToScreen(p.x,p.y,0));
-
-  // A thin concrete apron visually connects the footprint to the lot/sidewalk.
-  const apronColor=state.night?'#34383a':'#77756d';
-  fillPolygon(apron,apronColor);
-  strokePolygon(apron,state.night?'rgba(195,202,204,.12)':'rgba(255,255,255,.13)',Math.max(.7,zoom));
-
-  // Soft cast shadow stays close to the structure; it should never look like a gap.
-  const cast=g.base.map(p=>({x:p.x+2.2*zoom,y:p.y+3.2*zoom}));
-  fillPolygon(cast,state.night?'rgba(0,0,0,.28)':'rgba(0,0,0,.16)');
-
-  // Strong contact shadow sits directly under the wall footprint.
-  const contact=g.base.map(p=>({x:p.x+.55*zoom,y:p.y+.8*zoom}));
-  fillPolygon(contact,state.night?'rgba(0,0,0,.48)':'rgba(0,0,0,.32)');
-
-  // Crisp footing line makes the exact wall/ground join obvious.
-  strokePolygon(g.base,state.night?'rgba(12,15,17,.78)':'rgba(28,30,29,.62)',Math.max(1,1.35*zoom));
-}
-
-function drawFoundationBand(face,style){
-  const band=faceQuad(face,0,1,.965,1);
-  const baseTone=state.night?shadeHex(style.faceY||style.faceX,-.42):shadeHex(style.faceY||style.faceX,-.24);
-  fillPolygon(band,baseTone);
-  const seamA=facePoint(face,0,.965),seamB=facePoint(face,1,.965);
-  ctx.save();
-  ctx.strokeStyle=state.night?'rgba(220,225,224,.08)':'rgba(255,255,255,.10)';
-  ctx.lineWidth=Math.max(.6,state.camera.zoom*.8);
-  ctx.beginPath();ctx.moveTo(seamA.x,seamA.y);ctx.lineTo(seamB.x,seamB.y);ctx.stroke();
-  ctx.restore();
-}
-
-function drawFacade(o,face,style,now){
-  const floors=clamp(Math.round(Number(o.floors)||3),1,30);
-  const cols=clamp(Math.floor(face.span/48),2,7);
-  const special=['corner-store','bank','casino','nightclub','gym','hospital'].includes(o.kind);
-
-  for(let floor=0;floor<floors;floor++){
-    if(floor===0&&special){
-      const quad=faceQuad(face,.07,.93,1-(.76/floors),1-(.08/floors));
-      fillPolygon(quad,state.night?shadeHex(style.windowNight,-.18):style.window);
-      strokePolygon(quad,withAlpha(style.trim,.55),.8);
-      continue;
-    }
-
-    for(let col=0;col<cols;col++){
-      const gap=.12;
-      const cell=1/cols;
-      const u0=col*cell+cell*gap,u1=(col+1)*cell-cell*gap;
-      const v0=1-((floor+.76)/floors),v1=1-((floor+.22)/floors);
-      const quad=faceQuad(face,u0,u1,v0,v1);
-      const lit=state.night&&windowLit(o.id,floor,col);
-      fillPolygon(quad,lit?style.windowNight:style.window);
-      strokePolygon(quad,withAlpha(style.trim,.4),.55);
-    }
-
-    if(floor>0){
-      const y=1-floor/floors;
-      const a=facePoint(face,0,y),b=facePoint(face,1,y);
-      ctx.strokeStyle=withAlpha(style.trim,.28);ctx.lineWidth=.7;
-      ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
-    }
-  }
-
-  if(special){
-    const sign=faceQuad(face,.15,.85,1-(.96/floors),1-(.80/floors));
-    fillPolygon(sign,state.night?style.accent:shadeHex(style.accent,-.08));
-  }
-}
-
-function facePoint(face,u,v){
-  const top={x:lerp(face.topA.x,face.topB.x,u),y:lerp(face.topA.y,face.topB.y,u)};
-  const bottom={x:lerp(face.baseA.x,face.baseB.x,u),y:lerp(face.baseA.y,face.baseB.y,u)};
-  return{x:lerp(top.x,bottom.x,v),y:lerp(top.y,bottom.y,v)};
-}
-
-function faceQuad(face,u0,u1,v0,v1){
-  return[
-    facePoint(face,u0,v0),facePoint(face,u1,v0),
-    facePoint(face,u1,v1),facePoint(face,u0,v1)
-  ];
-}
-
-function drawRoofDetails(o,g,style){
-  if((o.floors||1)<2)return;
-  const count=(o.kind==='office'||o.kind==='hospital')?2:1;
-  for(let i=0;i<count;i++){
-    const ox=(i-(count-1)/2)*Math.min(o.width*.18,50);
-    drawMiniPrism(o.x+ox,o.y-o.height*.06,Math.min(55,o.width*.23),Math.min(38,o.height*.22),g.elevation,18,shadeHex(style.roof||style.top,-.1));
-  }
-}
-
-function drawMiniPrism(x,y,w,h,zBase,zHeight,color){
-  const fake={x,y,width:w,height:h,rotation:0};
-  const corners=footprintCorners(fake);
-  const base=corners.map(p=>worldToScreen(p.x,p.y,zBase));
-  const top=corners.map(p=>worldToScreen(p.x,p.y,zBase+zHeight));
-  fillPolygon([base[1],base[2],top[2],top[1]],shadeHex(color,-.18));
-  fillPolygon([base[2],base[3],top[3],top[2]],shadeHex(color,-.3));
-  fillPolygon(top,color);
-}
-
-function drawBuildingLabel(o,p,style){
-  const text=o.label||o.kind||'Building';
-  ctx.save();
-  ctx.font='800 10px system-ui';
-  const w=Math.min(180,ctx.measureText(text).width+14);
-  const x=p.x-w/2,y=p.y-7;
-  ctx.fillStyle=state.night?'rgba(4,7,11,.82)':'rgba(17,20,21,.78)';
-  ctx.fillRect(x,y-9,w,18);
-  ctx.fillStyle=style.accent||'#d78e36';
-  ctx.fillRect(x,y-9,3,18);
-  ctx.fillStyle='#f1eee8';ctx.textAlign='center';ctx.textBaseline='middle';
-  ctx.fillText(text,p.x,y,w-10);
-  ctx.restore();
-}
-
-function isNamedLandmark(o){
-  return['bank','casino','nightclub','hospital','gym','corner-store'].includes(o.kind);
-}
-
-function entityDepth(o){
-  if(o.type==='building'){
-    const corners=footprintCorners(o);
-    return Math.max(...corners.map(p=>p.x+p.y));
-  }
-  return (o.x||0)+(o.y||0)+(o.radius||0);
-}
-
-function drawIsoProp(o,now){
-  const p=worldToScreen(o.x,o.y,0);
-  const scale=clamp(state.camera.zoom,.35,1.35);
-
-  if(o.kind==='tree'){
-    const trunkTop=worldToScreen(o.x,o.y,36);
-    ctx.strokeStyle='#584335';ctx.lineWidth=5*scale;ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(trunkTop.x,trunkTop.y);ctx.stroke();
-    const crown=worldToScreen(o.x,o.y,56);
-    ctx.fillStyle='rgba(0,0,0,.18)';ctx.beginPath();ctx.ellipse(p.x+5,p.y+4,16*scale,7*scale,0,0,Math.PI*2);ctx.fill();
-    ctx.fillStyle=state.night?'#294634':o.color||'#4f7258';ctx.beginPath();ctx.arc(crown.x,crown.y,17*scale,0,Math.PI*2);ctx.fill();
-    ctx.fillStyle=state.night?'#31543c':'#5b8062';ctx.beginPath();ctx.arc(crown.x-7*scale,crown.y-4*scale,10*scale,0,Math.PI*2);ctx.fill();
-    return;
-  }
-
-  if(o.kind==='streetlight'){
-    const top=worldToScreen(o.x,o.y,72);
-    ctx.strokeStyle='#586168';ctx.lineWidth=Math.max(1.5,2.4*scale);ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(top.x,top.y);ctx.stroke();
-    ctx.fillStyle=state.night?'#ffe2a1':'#cfd4d5';ctx.beginPath();ctx.arc(top.x,top.y,3.5*scale,0,Math.PI*2);ctx.fill();
-    if(state.night){
-      const g=ctx.createRadialGradient(top.x,top.y,0,top.x,top.y,28*scale);
-      g.addColorStop(0,'rgba(255,218,145,.28)');g.addColorStop(1,'rgba(255,218,145,0)');
-      ctx.fillStyle=g;ctx.beginPath();ctx.arc(top.x,top.y,28*scale,0,Math.PI*2);ctx.fill();
-    }
-    return;
-  }
-
-  if(o.kind==='parked-car'){
-    drawMiniWorldObject(o,48,22,12,o.color||'#687785');
-    return;
-  }
-  if(o.kind==='dumpster'){
-    drawMiniWorldObject(o,30,24,24,o.color||'#466052');
-    return;
-  }
-  if(o.kind==='planter'){
-    drawMiniWorldObject(o,28,28,12,o.color||'#586958');
-    const leaf=worldToScreen(o.x,o.y,25);
-    ctx.fillStyle=state.night?'#2e4f36':'#52745a';ctx.beginPath();ctx.arc(leaf.x,leaf.y,7*scale,0,Math.PI*2);ctx.fill();
-    return;
-  }
-  if(o.kind==='bench'){
-    drawMiniWorldObject(o,34,12,9,o.color||'#7e634d');
-    return;
-  }
-  if(o.kind==='bus-stop'){
-    const left=worldToScreen(o.x-15,o.y,0),leftTop=worldToScreen(o.x-15,o.y,44);
-    const right=worldToScreen(o.x+15,o.y,0),rightTop=worldToScreen(o.x+15,o.y,44);
-    ctx.strokeStyle='#69747a';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(left.x,left.y);ctx.lineTo(leftTop.x,leftTop.y);ctx.moveTo(right.x,right.y);ctx.lineTo(rightTop.x,rightTop.y);ctx.stroke();
-    ctx.strokeStyle='#96a5aa';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(leftTop.x,leftTop.y);ctx.lineTo(rightTop.x,rightTop.y);ctx.stroke();
-    return;
-  }
-
-  ctx.fillStyle=o.color||'#777';ctx.beginPath();ctx.arc(p.x,p.y,Math.max(3,(o.radius||8)*scale*.5),0,Math.PI*2);ctx.fill();
-}
-
-function drawMiniWorldObject(o,w,h,zHeight,color){
-  const fake={x:o.x,y:o.y,width:w,height:h,rotation:o.rotation||0};
-  const corners=footprintCorners(fake);
-  const base=corners.map(p=>worldToScreen(p.x,p.y,0));
-  const top=corners.map(p=>worldToScreen(p.x,p.y,zHeight));
-  fillPolygon([base[1],base[2],top[2],top[1]],shadeHex(color,-.15));
-  fillPolygon([base[2],base[3],top[3],top[2]],shadeHex(color,-.28));
-  fillPolygon(top,color);
 }
 
 function drawInteractionMarker(o,now,isIso){
@@ -1115,67 +764,45 @@ function drawPlayer(isIso){
 }
 
 function drawDraftPreview(d){
-  ctx.save();ctx.globalAlpha=.74;ctx.strokeStyle='#e5a452';ctx.fillStyle='rgba(229,164,82,.16)';ctx.lineWidth=2;ctx.setLineDash([7,5]);
+  ctx.save();
+  ctx.globalAlpha=.74;
+  ctx.strokeStyle='#e5a452';
+  ctx.fillStyle='rgba(229,164,82,.16)';
+  ctx.lineWidth=2;
+  ctx.setLineDash([7,5]);
   if(d.type==='road'){
-    if(state.view==='iso'){
-      const temp={...d,width:96};
-      const pts=roadWorldPolygon(temp,0).map(p=>worldToScreen(p.x,p.y));fillPolygon(pts,'rgba(229,164,82,.22)');strokePolygon(pts,'#e5a452',1.5,[7,5]);
-    }else{
-      const a=worldToScreen(d.x1,d.y1),b=worldToScreen(d.x2,d.y2);ctx.lineWidth=96*state.camera.zoom;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
-    }
+    const a=worldToScreen(d.x1,d.y1),b=worldToScreen(d.x2,d.y2);
+    ctx.lineWidth=96*state.camera.zoom;
+    ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
   }else{
     const fake={x:d.x+d.width/2,y:d.y+d.height/2,width:d.width,height:d.height,rotation:0};
     const pts=footprintCorners(fake).map(p=>worldToScreen(p.x,p.y));
-    fillPolygon(pts,'rgba(229,164,82,.18)');strokePolygon(pts,'#e5a452',1.5,[7,5]);
+    fillPolygon(pts,'rgba(229,164,82,.18)');
+    strokePolygon(pts,'#e5a452',1.5,[7,5]);
   }
   ctx.restore();
 }
 
 function drawSelection(o){
-  if(state.view==='iso'&&o.type==='building'){
-    const g=buildingGeometry(o);
-    strokePolygon(g.top,'#f2b35f',2,[6,4]);
-    strokePolygon(g.base,'rgba(242,179,95,.72)',1.5,[5,4]);
-    for(let i=0;i<4;i++){
-      ctx.strokeStyle='#f2b35f';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(g.base[i].x,g.base[i].y);ctx.lineTo(g.top[i].x,g.top[i].y);ctx.stroke();
-    }
-    return;
-  }
-
-  ctx.save();ctx.strokeStyle='#f2b35f';ctx.lineWidth=2;ctx.setLineDash([6,4]);
+  ctx.save();
+  ctx.strokeStyle='#f2b35f';
+  ctx.lineWidth=2;
+  ctx.setLineDash([6,4]);
   if(o.type==='road'){
-    const pts=roadWorldPolygon(o,5).map(p=>worldToScreen(p.x,p.y));strokePolygon(pts,'#f2b35f',2,[6,4]);
+    const a=worldToScreen(o.x1,o.y1),b=worldToScreen(o.x2,o.y2);
+    ctx.lineWidth=Math.max(3,(o.width+10)*state.camera.zoom);
+    ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
   }else if(o.type==='building'||o.type==='zone'){
-    const pts=footprintCorners(o).map(p=>worldToScreen(p.x,p.y));strokePolygon(pts,'#f2b35f',2,[6,4]);
+    const pts=footprintCorners(o).map(p=>worldToScreen(p.x,p.y));
+    strokePolygon(pts,'#f2b35f',2,[6,4]);
   }else{
-    const p=worldToScreen(o.x,o.y,state.view==='iso'?10:0);ctx.beginPath();ctx.arc(p.x,p.y,13,0,Math.PI*2);ctx.stroke();
+    const p=worldToScreen(o.x,o.y);
+    ctx.beginPath();ctx.arc(p.x,p.y,13,0,Math.PI*2);ctx.stroke();
   }
   ctx.restore();
 }
 
-function hitTest(worldX,worldY,screenX,screenY){
-  if(state.view==='iso'){
-    if(!state.hiddenLayers.has('interactions')){
-      for(const o of [...state.map.interactions].reverse()){
-        const p=worldToScreen(o.x,o.y,18);if(Math.hypot(screenX-p.x,screenY-p.y)<=16)return o;
-      }
-    }
-    if(!state.hiddenLayers.has('props')){
-      const props=[...state.map.props].sort((a,b)=>entityDepth(b)-entityDepth(a));
-      for(const o of props){
-        const p=worldToScreen(o.x,o.y,20);if(Math.hypot(screenX-p.x,screenY-p.y)<=Math.max(11,(o.radius||10)*state.camera.zoom))return o;
-      }
-    }
-    if(!state.hiddenLayers.has('buildings')){
-      const buildings=[...state.map.buildings].sort((a,b)=>entityDepth(b)-entityDepth(a));
-      for(const o of buildings){
-        const g=buildingGeometry(o);
-        if(pointInPolygon(screenX,screenY,g.top))return o;
-        for(const face of g.faces)if(pointInPolygon(screenX,screenY,face.points))return o;
-      }
-    }
-  }
-
+function hitTest(worldX,worldY){
   const order=[
     ...(!state.hiddenLayers.has('interactions')?[...state.map.interactions].reverse():[]),
     ...(!state.hiddenLayers.has('props')?[...state.map.props].reverse():[]),
@@ -1392,7 +1019,7 @@ function restoreAuthored(){
   state.selected=null;
   state.player.x=state.map.playerSpawn.x;state.player.y=state.map.playerSpawn.y;
   state.camera.x=state.map.width/2;state.camera.y=state.map.height/2;
-  saveDraft();syncMapInputs();refreshInspector();refreshStats();focusCurrentView(true);
+  saveDraft();syncMapInputs();refreshInspector();refreshStats();fitMap();
   say('Authored Downtown Proof restored.');
 }
 
@@ -1405,12 +1032,12 @@ function clearMap(){
   };
   state.selected=null;
   state.player.x=1536;state.player.y=1536;
-  saveDraft();syncMapInputs();refreshInspector();focusCurrentView(true);say('Map cleared.');
+  saveDraft();syncMapInputs();refreshInspector();fitMap();say('Map cleared.');
 }
 
 function togglePreview(){
   state.preview=!state.preview;
-  if(state.preview&&state.view!=='iso')setView('iso',false);
+  state.view='plan';
   $('#preview-toggle').classList.toggle('active',state.preview);
   $('#preview-toggle').textContent=state.preview?'■ EDIT':'▶ WALK';
   $('#preview-hud').hidden=!state.preview;
@@ -1419,16 +1046,18 @@ function togglePreview(){
   if(state.preview){
     state.player.x=state.map.playerSpawn?.x??state.map.width/2;
     state.player.y=state.map.playerSpawn?.y??state.map.height/2;
+    state.camera.x=state.player.x;
+    state.camera.y=state.player.y;
+    state.camera.zoom=(canvas.clientWidth||390)<=700?.9:1.05;
     state.selected=null;
     refreshInspector();
-    focusIsoReview(state.player,true);
     updatePreviewHud();
-    say('Walk test: closer 2.5D camera enabled. Use WASD/arrows or the mobile pad.');
+    updateZoomLabel();
+    say('2D walk test: use WASD/arrows or the mobile pad.');
   }else{
     state.keys.clear();
     state.moveButtons.clear();
-    ensureIsoReviewZoom(true);
-    say('Back in 2.5D neighborhood review mode.');
+    say('Back in 2D review mode.');
   }
   updateModeLabel();
 }
@@ -1496,7 +1125,7 @@ function importMap(raw,source='JSON'){
   state.selected=null;
   state.player.x=map.playerSpawn.x;state.player.y=map.playerSpawn.y;
   state.camera.x=map.width/2;state.camera.y=map.height/2;
-  syncMapInputs();refreshInspector();refreshStats();saveDraft();focusCurrentView(true);
+  syncMapInputs();refreshInspector();refreshStats();saveDraft();fitMap();
   say(`Loaded ${map.name} from ${source}.`);
 }
 

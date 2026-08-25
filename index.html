@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#090b0e">
-  <title>RiftMap — RiftCity 2.5D World Reviewer</title>
+  <title>RiftMap — RiftCity 2D World Editor</title>
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
@@ -12,7 +12,7 @@
     <header class="topbar">
       <div class="brand">
         <span>RIFTCITY</span>
-        <strong>2.5D WORLD REVIEWER</strong>
+        <strong>2D WORLD EDITOR</strong>
       </div>
 
       <div class="tool-strip" aria-label="Map tools">
@@ -28,10 +28,6 @@
       </div>
 
       <div class="view-actions">
-        <div class="segmented" aria-label="Map view">
-          <button id="view-plan">PLAN</button>
-          <button id="view-iso" class="active">2.5D</button>
-        </div>
         <button id="lighting-toggle">NIGHT</button>
       </div>
 
@@ -56,7 +52,7 @@
         <span class="kicker">AUTHORED DISTRICT</span>
         <strong>Downtown Proof</strong>
         <small>
-          This map is generated as RiftCity's first 2.5D district. Use the editor to review and tune it instead of hand-building everything.
+          This is RiftCity's first authored 2D district. Use the editor to review, tune, and expand it instead of hand-building the whole city.
         </small>
         <button id="restore-authored" class="primary full-button">RESTORE AUTHORED DOWNTOWN</button>
       </section>
@@ -103,14 +99,14 @@
         </div>
       </section>
 
-      <div class="panel-status" id="status">RiftMap 2.5D ready.</div>
+      <div class="panel-status" id="status">RiftMap 2D ready.</div>
     </aside>
 
     <main class="viewport" id="viewport">
-      <canvas id="map-canvas" tabindex="0" aria-label="RiftCity 2.5D world editor"></canvas>
+      <canvas id="map-canvas" tabindex="0" aria-label="RiftCity 2D world editor"></canvas>
 
       <div class="viewport-badge">
-        <span id="mode-label">SELECT · 2.5D</span>
+        <span id="mode-label">SELECT · 2D</span>
         <strong id="map-title">RiftCity — Downtown Proof District</strong>
         <small id="cursor-readout">X 0 · Y 0 · 100%</small>
       </div>
@@ -217,9 +213,8 @@
       <section class="panel-section help-card">
         <span class="kicker">REVIEW WORKFLOW</span>
         <small>
-          Use <b>2.5D</b> to judge the district visually and <b>PLAN</b> for precise layout edits.
-          In either view: drag selected objects, adjust the inspector, or swap building style/floors.
-          WALK tests collision and interaction placement.
+          Review and edit the city directly in top-down 2D. Drag objects, adjust the inspector, or swap building styles.
+          WALK tests the same map with player movement, collision, and interaction placement.
         </small>
       </section>
 

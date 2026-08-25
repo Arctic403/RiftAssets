@@ -1,64 +1,36 @@
-# RiftAssets → RiftMap 2.5D
+# RiftAssets → RiftMap 2D
 
-RiftAssets is now the **RiftCity 2.5D World Reviewer / Map Editor**.
+RiftAssets is the **RiftCity 2D World Editor / Reviewer**.
 
-The workflow is intentionally different from a blank level editor:
+The project has intentionally returned to a pure top-down 2D workflow so the city can be built, reviewed, and expanded much faster. The map data remains structured so a future 2.5D renderer can still consume the same world layout if desired.
 
-1. RiftCity districts are authored as complete starting layouts.
-2. RiftMap loads the authored district in both plan and 2.5D views.
-3. The editor is used to review, move, resize, restyle, and fix the authored layout.
-4. The same exported map JSON is designed to be consumed later by the RiftCity game runtime.
+## Current workflow
 
-## Phase 4 — authored Downtown proof
+1. District layouts are authored as complete starting maps.
+2. RiftMap loads the district as a top-down 2D world.
+3. Use the editor to review, move, resize, restyle, and fix objects.
+4. WALK mode tests player movement, collision, camera following, and nearby interactions.
+5. Exported map JSON is intended to feed the RiftCity game runtime.
 
-The default map is now **RiftCity — Downtown Proof District**.
+## Downtown proof district
 
-It includes:
+The existing Downtown proof is preserved, including roads, buildings, props, lots/zones, interaction markers, player spawn, and gameplay metadata.
 
-- 8 roads and alleys.
-- 18 authored buildings.
-- 34 street props.
-- 10 lot / district / gameplay zones.
-- 9 gameplay interaction markers.
-- Apartments, shops, offices, a bank, gym, hospital, warehouse, casino, and nightclub.
-- Player spawn and walk-test collision.
-- Day / night review.
-- Procedural 2.5D building façades with floors, windows, storefront glazing, signs, roof equipment, and depth sorting.
+## 2D presentation
 
-The procedural building art is a **fallback visual system**, not the final sprite pack. Every building now carries an `assetId` plus a style and floor count so final transparent sprite artwork can replace the fallback later without rebuilding district layout data.
+The renderer now focuses on readable top-down visuals:
 
-## Views
+- roads, sidewalks, and lane markings,
+- building roof silhouettes and roof details,
+- shadows and outlines,
+- distinct landmark styling,
+- trees, parked cars, streetlights, benches, dumpsters, and bus stops,
+- day/night preview,
+- collision and interaction markers,
+- smooth pan/zoom,
+- mobile touch and pinch controls.
 
-### 2.5D
-
-The default review view uses an isometric projection with:
-
-- extruded building massing,
-- visible façades,
-- floor/window detail,
-- roof equipment,
-- street props,
-- road/sidewalk surfaces,
-- depth sorting,
-- interaction markers,
-- player walk test,
-- day/night lighting preview.
-
-Use this view to judge whether the district feels like the game.
-
-### Plan
-
-Plan view keeps precise top-down footprints for layout work:
-
-- roads,
-- lots,
-- collision footprints,
-- buildings,
-- zones,
-- props,
-- interaction positions.
-
-Use PLAN when exact placement matters.
+The current artwork is still a reusable procedural fallback. Building `assetId` values remain in the map so proper 2D sprites/textures can replace the fallback visuals later without rebuilding the city layout.
 
 ## Editor tools
 
@@ -66,7 +38,7 @@ Use PLAN when exact placement matters.
 - Mouse, keyboard, iPhone touch, and pinch zoom.
 - Grid snapping.
 - Move, duplicate, delete, reorder, and nudge.
-- Building floor count, style, and future `assetId`.
+- Building style and asset ID metadata.
 - Collision flags.
 - Player spawn placement.
 - Layer visibility.
@@ -78,7 +50,7 @@ Use PLAN when exact placement matters.
 
 ## Map format
 
-The map remains:
+Maps continue to use:
 
 ```json
 {
@@ -97,25 +69,14 @@ The map remains:
 }
 ```
 
-A building can now include:
-
-```json
-{
-  "kind": "apartment",
-  "floors": 5,
-  "style": "brick-warm",
-  "assetId": "building.apartment.brick-warm"
-}
-```
-
-`assetId` is the bridge to the final shared sprite library.
+No map conversion is required to continue editing existing version 2 exports.
 
 ## Files
 
-- `index.html` — reviewer/editor UI.
+- `index.html` — 2D editor/reviewer UI.
 - `styles.css` — desktop/mobile interface.
-- `app.js` — 2D/2.5D rendering, editing, depth sorting, preview, import/export.
-- `map/default-map.js` — authored Downtown proof district and editor palettes.
-- `map/world-kit.js` — shared building/material/prop/interaction style catalog.
+- `app.js` — 2D rendering, editing, walking, collision, import/export.
+- `map/default-map.js` — authored Downtown proof and placement palettes.
+- `map/world-kit.js` — shared building/prop/interaction style metadata.
 
-The project stays static and GitHub Pages-ready with no build step and no external rendering engine.
+Static GitHub Pages project. No build step.
