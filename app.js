@@ -841,14 +841,14 @@ function drawIsoBuilding(o,now){
   const g=buildingGeometry(o);
   const style=resolvedBuildingStyle(o);
 
-  const shadow=g.base.map(p=>({x:p.x+7*state.camera.zoom,y:p.y+10*state.camera.zoom}));
-  fillPolygon(shadow,'rgba(0,0,0,.22)');
+  drawBuildingGrounding(o,g,style);
 
   for(const face of g.faces){
     const tone=face.edge===1?style.faceX:style.faceY;
     fillPolygon(face.points,state.night?shadeHex(tone,-.26):tone);
     strokePolygon(face.points,'rgba(0,0,0,.28)',1);
     drawFacade(o,face,style,now);
+    drawFoundationBand(face,style);
   }
 
   fillPolygon(g.top,state.night?shadeHex(style.top,-.22):style.top);
@@ -860,6 +860,53 @@ function drawIsoBuilding(o,now){
     const labelPoint=worldToScreen(o.x,o.y,g.elevation*.63);
     drawBuildingLabel(o,labelPoint,style);
   }
+}
+
+function expandedFootprint(o,padding){
+  const w=Math.max(2,Number(o.width)||2);
+  const h=Math.max(2,Number(o.height)||2);
+  const sx=(w+padding*2)/w;
+  const sy=(h+padding*2)/h;
+  const a=(Number(o.rotation)||0)*Math.PI/180,c=Math.cos(a),s=Math.sin(a);
+  const local=[[-w/2,-h/2],[w/2,-h/2],[w/2,h/2],[-w/2,h/2]];
+  return local.map(([x,y])=>{
+    const ex=x*sx,ey=y*sy;
+    return{x:o.x+ex*c-ey*s,y:o.y+ex*s+ey*c};
+  });
+}
+
+function drawBuildingGrounding(o,g,style){
+  const zoom=state.camera.zoom;
+  const apronWorld=expandedFootprint(o,Math.max(8,Math.min(18,Math.min(o.width,o.height)*.08)));
+  const apron=apronWorld.map(p=>worldToScreen(p.x,p.y,0));
+
+  // A thin concrete apron visually connects the footprint to the lot/sidewalk.
+  const apronColor=state.night?'#34383a':'#77756d';
+  fillPolygon(apron,apronColor);
+  strokePolygon(apron,state.night?'rgba(195,202,204,.12)':'rgba(255,255,255,.13)',Math.max(.7,zoom));
+
+  // Soft cast shadow stays close to the structure; it should never look like a gap.
+  const cast=g.base.map(p=>({x:p.x+2.2*zoom,y:p.y+3.2*zoom}));
+  fillPolygon(cast,state.night?'rgba(0,0,0,.28)':'rgba(0,0,0,.16)');
+
+  // Strong contact shadow sits directly under the wall footprint.
+  const contact=g.base.map(p=>({x:p.x+.55*zoom,y:p.y+.8*zoom}));
+  fillPolygon(contact,state.night?'rgba(0,0,0,.48)':'rgba(0,0,0,.32)');
+
+  // Crisp footing line makes the exact wall/ground join obvious.
+  strokePolygon(g.base,state.night?'rgba(12,15,17,.78)':'rgba(28,30,29,.62)',Math.max(1,1.35*zoom));
+}
+
+function drawFoundationBand(face,style){
+  const band=faceQuad(face,0,1,.965,1);
+  const baseTone=state.night?shadeHex(style.faceY||style.faceX,-.42):shadeHex(style.faceY||style.faceX,-.24);
+  fillPolygon(band,baseTone);
+  const seamA=facePoint(face,0,.965),seamB=facePoint(face,1,.965);
+  ctx.save();
+  ctx.strokeStyle=state.night?'rgba(220,225,224,.08)':'rgba(255,255,255,.10)';
+  ctx.lineWidth=Math.max(.6,state.camera.zoom*.8);
+  ctx.beginPath();ctx.moveTo(seamA.x,seamA.y);ctx.lineTo(seamB.x,seamB.y);ctx.stroke();
+  ctx.restore();
 }
 
 function drawFacade(o,face,style,now){
