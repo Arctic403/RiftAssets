@@ -1,0 +1,285 @@
+name: Build Ironvale Remote Asset Library
+
+on:
+  push:
+    paths:
+      - '.github/workflows/build-ironvale-library.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-library:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout RiftAssets
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch pinned Quaternius sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/quaternius
+          git clone --filter=blob:none --no-checkout https://github.com/agentkaerf/FreeModels.git /tmp/quaternius
+          git -C /tmp/quaternius sparse-checkout init --cone
+          git -C /tmp/quaternius sparse-checkout set --skip-checks \
+            'Medieval Village MegaKit[Standard]' \
+            'Stylized Nature MegaKit[Standard]' \
+            'Fantasy Props MegaKit[Standard]' \
+            'Modular Character Outfits - Fantasy[Standard]' \
+            'Ultimate Animated Animals - July 2021'
+          git -C /tmp/quaternius checkout db3df04d1e4714298a09510b26fb6de6645138a2
+
+      - name: Fetch pinned KayKit dungeon source
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/kaykit
+          git clone --filter=blob:none --no-checkout https://github.com/KayKit-Game-Assets/KayKit-Dungeon-Remastered-1.0.git /tmp/kaykit
+          git -C /tmp/kaykit sparse-checkout init --cone
+          git -C /tmp/kaykit sparse-checkout set 'addons/kaykit_dungeon_remastered/Assets/gltf'
+          git -C /tmp/kaykit checkout b0ca9bd96a8072ab36a3a5464f00ed1e06a16d07
+          git -C /tmp/kaykit show b0ca9bd96a8072ab36a3a5464f00ed1e06a16d07:LICENSE.txt > /tmp/kaykit/LICENSE.txt
+
+      - name: Build approved runtime library
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf ironvale/library ironvale/registry.json ironvale/asset-lock.json
+          mkdir -p ironvale/library
+          python3 <<'PY'
+          import json, re, shutil
+          from pathlib import Path
+
+          ROOT = Path('ironvale/library')
+          Q = Path('/tmp/quaternius')
+          K = Path('/tmp/kaykit')
+          RUNTIME_EXT = {'.gltf','.glb','.bin','.png','.jpg','.jpeg','.webp'}
+          RESTRICTED = re.compile(r'(sword|dagger|knife|axe|mace|spear|bow|crossbow|arrow|weapon|shield|halberd|hammer|club|blade|staff)', re.I)
+
+          def copy_runtime_pack(src, dst):
+              src, dst = Path(src), Path(dst)
+              dst.mkdir(parents=True, exist_ok=True)
+              for p in src.rglob('*'):
+                  if not p.is_file():
+                      continue
+                  if p.suffix.lower() in RUNTIME_EXT or 'license' in p.name.lower():
+                      rel = p.relative_to(src)
+                      out = dst / rel
+                      out.parent.mkdir(parents=True, exist_ok=True)
+                      shutil.copy2(p, out)
+
+          def copy_gltf_with_refs(gltf, root, dst_root):
+              rel = gltf.relative_to(root)
+              out = dst_root / rel
+              out.parent.mkdir(parents=True, exist_ok=True)
+              shutil.copy2(gltf, out)
+              try:
+                  doc = json.loads(gltf.read_text(encoding='utf-8'))
+              except Exception:
+                  return
+              uris = []
+              for row in doc.get('buffers', []):
+                  uri = row.get('uri')
+                  if uri and not str(uri).startswith('data:'):
+                      uris.append(uri)
+              for row in doc.get('images', []):
+                  uri = row.get('uri')
+                  if uri and not str(uri).startswith('data:'):
+                      uris.append(uri)
+              for uri in uris:
+                  source = (gltf.parent / uri).resolve()
+                  try:
+                      rel_ref = source.relative_to(root.resolve())
+                  except Exception:
+                      continue
+                  if source.is_file():
+                      target = dst_root / rel_ref
+                      target.parent.mkdir(parents=True, exist_ok=True)
+                      shutil.copy2(source, target)
+
+          copy_runtime_pack(Q / 'Medieval Village MegaKit[Standard]', ROOT / 'quaternius-medieval-village')
+          copy_runtime_pack(Q / 'Stylized Nature MegaKit[Standard]', ROOT / 'quaternius-stylized-nature')
+          copy_runtime_pack(Q / 'Modular Character Outfits - Fantasy[Standard]', ROOT / 'quaternius-fantasy-outfits')
+          copy_runtime_pack(Q / 'Ultimate Animated Animals - July 2021', ROOT / 'quaternius-animated-animals')
+
+          props_src = Q / 'Fantasy Props MegaKit[Standard]'
+          props_dst = ROOT / 'quaternius-fantasy-props-safe'
+          props_dst.mkdir(parents=True, exist_ok=True)
+          safe_props = re.compile(r'(anvil|bag|banner|barrel|basket|bed|bench|book|bottle|bowl|bucket|cabinet|candle|carpet|cauldron|chair|chest|crate|cup|food|fruit|lantern|log|market|mug|mushroom|parchment|plate|potion|rope|sack|shelf|sign|stool|table|tent|torch|vegetable|wagon|wheel|wood|well|pot|pan|kettle|jar|broom|hay|bread|cheese|apple|carrot|pumpkin|tomato|cabbage|onion|garlic|herb|flower|box|cart|stall|camp|coal|forge|bell|door|window|fence|cloth|rug)', re.I)
+          for gltf in props_src.rglob('*.gltf'):
+              if safe_props.search(gltf.stem) and not RESTRICTED.search(gltf.stem):
+                  copy_gltf_with_refs(gltf, props_src, props_dst)
+          for p in props_src.rglob('*'):
+              if p.is_file() and 'license' in p.name.lower():
+                  out = props_dst / p.relative_to(props_src)
+                  out.parent.mkdir(parents=True, exist_ok=True)
+                  shutil.copy2(p, out)
+
+          dungeon_src = K / 'addons/kaykit_dungeon_remastered/Assets/gltf'
+          dungeon_dst = ROOT / 'kaykit-dungeon-environment'
+          dungeon_dst.mkdir(parents=True, exist_ok=True)
+          safe_dungeon = re.compile(r'(wall|floor|pillar|column|stair|arch|door|gate|bars|chain|chandelier|torch|crate|barrel|chest|rubble|table|chair|bench|shelf|rug|carpet|banner|coffin|grave|prison|cage|fence|bridge|platform|debris|window|ceiling|corridor|room|brick|stone|book|candle|lantern)', re.I)
+          for glb in dungeon_src.rglob('*.glb'):
+              if safe_dungeon.search(glb.stem) and not RESTRICTED.search(glb.stem):
+                  out = dungeon_dst / glb.relative_to(dungeon_src)
+                  out.parent.mkdir(parents=True, exist_ok=True)
+                  shutil.copy2(glb, out)
+          shutil.copy2('/tmp/kaykit/LICENSE.txt', dungeon_dst / 'LICENSE.txt')
+          PY
+
+      - name: Download CC0 terrain palette
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ironvale/library/terrain-materials
+          declare -A SURFACES=(
+            [grass]='Grass001'
+            [dirt]='Ground071'
+            [soil]='Ground066'
+            [gravel]='Ground064'
+            [rock]='Rock051'
+            [path]='PavingStones131'
+          )
+          for layer in "${!SURFACES[@]}"; do
+            id="${SURFACES[$layer]}"
+            zip="/tmp/${id}_1K-JPG.zip"
+            dir="ironvale/library/terrain-materials/${layer}"
+            rm -rf "$dir" && mkdir -p "$dir"
+            curl -fL --retry 4 --retry-delay 2 "https://ambientcg.com/get?file=${id}_1K-JPG.zip" -o "$zip"
+            unzip -q "$zip" -d "$dir"
+          done
+
+      - name: Write remote registry and provenance lock
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          import hashlib, json
+          from pathlib import Path
+
+          root = Path('ironvale')
+          library = root / 'library'
+          raw_base = 'https://raw.githubusercontent.com/Arctic403/RiftAssets/main/ironvale/library'
+          pages_base = 'https://arctic403.github.io/RiftAssets/ironvale/library'
+          rows = [
+            ('quaternius-medieval-village','Medieval Village MegaKit Standard','environment/buildings'),
+            ('quaternius-stylized-nature','Stylized Nature MegaKit Standard','environment/nature'),
+            ('quaternius-fantasy-props-safe','Fantasy Props MegaKit Standard - curated safe environment/interior subset','environment/props'),
+            ('kaykit-dungeon-environment','KayKit Dungeon Remastered 1.0 - curated safe environment subset','environment/dungeon'),
+            ('quaternius-fantasy-outfits','Modular Character Outfits - Fantasy Standard','character/outfits'),
+            ('quaternius-animated-animals','Ultimate Animated Animals','character/animals'),
+            ('terrain-materials','ambientCG 1K JPG PBR terrain palette','terrain/materials'),
+          ]
+
+          files=[]
+          for p in sorted(library.rglob('*')):
+              if not p.is_file(): continue
+              h=hashlib.sha256()
+              with p.open('rb') as f:
+                  for chunk in iter(lambda:f.read(1024*1024),b''): h.update(chunk)
+              rel=p.relative_to(library).as_posix()
+              files.append({'path':rel,'bytes':p.stat().st_size,'sha256':h.hexdigest(),'url':f'{raw_base}/{rel}'})
+
+          packs=[]; assets=[]
+          for pid,title,role in rows:
+              folder=library/pid
+              models=sorted(list(folder.rglob('*.gltf'))+list(folder.rglob('*.glb')))
+              packs.append({'id':pid,'title':title,'role':role,'modelCount':len(models),'remoteRoot':f'{raw_base}/{pid}'})
+              for p in models:
+                  rel=p.relative_to(folder).as_posix()
+                  stable=f'{pid}:{rel.rsplit(".",1)[0]}'
+                  full_rel=f'{pid}/{rel}'
+                  assets.append({
+                    'id':stable,
+                    'pack':pid,
+                    'role':role,
+                    'path':full_rel,
+                    'url':f'{raw_base}/{full_rel}',
+                    'pagesUrl':f'{pages_base}/{full_rel}'
+                  })
+
+          registry={
+            'format':'ironvale-remote-asset-registry-v1',
+            'repository':'Arctic403/RiftAssets',
+            'branch':'main',
+            'rawBase':raw_base,
+            'pagesBase':pages_base,
+            'cachePolicy':'fetch on first use; cache only selected/used assets locally',
+            'packs':packs,
+            'assets':assets
+          }
+          lock={
+            'format':'ironvale-remote-asset-lock-v1',
+            'licensePolicy':'CC0-1.0 runtime sources only',
+            'sources':{
+              'quaternius':{'creator':'Quaternius','mirrorRepository':'agentkaerf/FreeModels','commit':'db3df04d1e4714298a09510b26fb6de6645138a2','license':'CC0-1.0'},
+              'kaykitDungeon':{'creator':'Kay Lousberg / KayKit','repository':'KayKit-Game-Assets/KayKit-Dungeon-Remastered-1.0','commit':'b0ca9bd96a8072ab36a3a5464f00ed1e06a16d07','license':'CC0-1.0'},
+              'ambientCG':{'creator':'ambientCG','resolution':'1K-JPG','license':'CC0-1.0','assets':{'grass':'Grass001','dirt':'Ground071','soil':'Ground066','gravel':'Ground064','rock':'Rock051','path':'PavingStones131'}}
+            },
+            'files':files
+          }
+          root.mkdir(parents=True,exist_ok=True)
+          (root/'registry.json').write_text(json.dumps(registry,indent=2)+'\n')
+          (root/'asset-lock.json').write_text(json.dumps(lock,indent=2)+'\n')
+          (root/'README.md').write_text(
+            '# Ironvale remote asset library\n\n'
+            'CC0 medieval world-building assets for Ironvale. The game/editor should fetch individual assets on demand and cache only assets actually used.\n\n'
+            '`registry.json` is the stable remote catalog. `asset-lock.json` pins provenance, file sizes and SHA-256 hashes.\n'
+          )
+          PY
+
+      - name: Verify remote library
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          import json,re
+          from pathlib import Path
+          root=Path('ironvale/library')
+          minimums={
+            'quaternius-medieval-village':100,
+            'quaternius-stylized-nature':40,
+            'quaternius-fantasy-props-safe':15,
+            'kaykit-dungeon-environment':25,
+            'quaternius-fantasy-outfits':20,
+            'quaternius-animated-animals':10,
+          }
+          failures=[]
+          for pack,minimum in minimums.items():
+              count=len(list((root/pack).rglob('*.gltf')))+len(list((root/pack).rglob('*.glb')))
+              print(f'{pack}: {count}')
+              if count<minimum: failures.append(f'{pack}: {count} < {minimum}')
+          restricted=re.compile(r'(sword|dagger|knife|axe|mace|spear|bow|crossbow|arrow|weapon|shield|halberd|blade|club)',re.I)
+          for safe_pack in ('quaternius-fantasy-props-safe','kaykit-dungeon-environment'):
+              for p in (root/safe_pack).rglob('*'):
+                  if p.is_file() and p.suffix.lower() in {'.gltf','.glb'} and restricted.search(p.name):
+                      failures.append(f'restricted mesh leaked: {p}')
+          registry=json.loads(Path('ironvale/registry.json').read_text())
+          lock=json.loads(Path('ironvale/asset-lock.json').read_text())
+          if len(registry.get('assets',[]))<400: failures.append('remote registry unexpectedly small')
+          if not lock.get('files'): failures.append('remote lock empty')
+          if any(p.stat().st_size>95*1024*1024 for p in root.rglob('*') if p.is_file()): failures.append('file over 95 MiB')
+          if failures: raise SystemExit('\n'.join(failures))
+          print('registered models:',len(registry['assets']))
+          print('locked files:',len(lock['files']))
+          PY
+          du -sh ironvale/library
+
+      - name: Commit remote library
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add ironvale
+          if git diff --cached --quiet; then
+            echo 'Remote library already current.'
+            exit 0
+          fi
+          git commit -m 'Host Ironvale medieval asset library remotely'
+          git push origin HEAD:main
